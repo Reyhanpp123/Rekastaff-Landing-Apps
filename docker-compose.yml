@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  nextjs:
+    container_name: REKASTAFF-Web-Apps-Landing-Page
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - "3000"
+    env_file:
+      - /var/www/rekastaff-landing-page/.env.production
+    networks:
+      - rekastaff-web-apps-network
+      
+networks:
+  rekastaff-web-apps-network:
+    external: true
+    name: rekastaff-web-apps-network
+ 
