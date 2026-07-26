@@ -10,7 +10,7 @@ services:
     expose:
       - "3000"
     env_file:
-      - /var/www/rekastaff-landing-page/.env.production
+      - /var/www/infra/vault/data/env/.env.rekastaff-landing-page
     networks:
       - rekastaff-web-apps-network
       
