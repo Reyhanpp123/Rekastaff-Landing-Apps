@@ -45,7 +45,7 @@ import {
   isFreeProduct,
   parseFeatureList,
 } from "@/lib/billing";
-import { HRD_LOGIN_URL } from "@/lib/site";
+import { buildRegisterUrl, STARTER_PRD_IDX } from "@/lib/site";
 
 const formatter = new Intl.NumberFormat("id-ID", {
   style: "currency",
@@ -154,6 +154,21 @@ export default function PricingSection() {
       setEmployeeCount(1);
     }
   };
+
+  const getProductRegisterUrl = (product: BillingProduct) => {
+    if (isFreeProduct(product)) {
+      return buildRegisterUrl({ prd_idx: product.prd_idx });
+    }
+    const pkg = getPackageForDuration(product, duration);
+    return buildRegisterUrl({
+      prd_idx: product.prd_idx,
+      pkg_idx: pkg?.pkg_idx,
+    });
+  };
+
+  const recommendedRegisterUrl = recommended
+    ? getProductRegisterUrl(recommended)
+    : buildRegisterUrl({ prd_idx: STARTER_PRD_IDX });
 
   const durations = [
     { value: 1, label: "1 Bulan" },
@@ -423,7 +438,7 @@ export default function PricingSection() {
                       )}
                   </div>
 
-                  <a href={HRD_LOGIN_URL} className="w-full">
+                  <a href={recommendedRegisterUrl} className="w-full">
                     <Button className="w-full font-bold group h-12 text-sm shadow-md">
                       Mulai Sekarang
                       <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -519,14 +534,15 @@ export default function PricingSection() {
                             : "bg-default-50/50"
                         }`}
                       >
-                        <a href={HRD_LOGIN_URL} className="w-full">
+                        <a href={getProductRegisterUrl(product)} className="w-full">
                           <Button
                             variant={isPopular || isRecommended ? undefined : "outline"}
                             className="w-full font-bold h-11 text-sm"
                           >
                             {isFreeProduct(product)
                               ? "Daftar Gratis"
-                              : product.prd_paytype === "personal"
+                              : product.prd_paytype === "personal" &&
+                                  !getPackageForDuration(product, duration)
                                 ? "Hubungi Sales"
                                 : `Pilih Paket ${product.prd_name}`}
                           </Button>

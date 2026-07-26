@@ -16,7 +16,7 @@ const HeroSection = () => {
               Kelola absensi, penggajian, cuti, dan manajemen karyawan dalam satu platform yang mudah digunakan. Fokus pada pertumbuhan bisnis Anda, biar Rekastaff yang urus HR.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="#contact">
+              <Link href="#pricing">
                 <Button size="lg" className="px-8 text-lg h-14">Mulai Sekarang</Button>
               </Link>
               <Link href="#features">

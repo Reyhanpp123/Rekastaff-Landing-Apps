@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { SiteLogo } from "@/components/svg";
 import { Button } from "@/components/ui/button";
-import { HRD_LOGIN_URL } from "@/lib/site";
+import { HRD_LOGIN_URL, HRD_REGISTER_STARTER_URL } from "@/lib/site";
 
 const Navbar = () => {
   return (
@@ -19,15 +19,15 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           <Link href="#features" className="transition-colors hover:text-primary">Fitur</Link>
           <Link href="#pricing" className="transition-colors hover:text-primary">Harga</Link>
-          <Link href="#contact" className="transition-colors hover:text-primary">Hubungi Kami</Link>
+          <Link href="#faq" className="transition-colors hover:text-primary">FAQ</Link>
         </nav>
         <div className="flex items-center gap-4">
           <a href={HRD_LOGIN_URL}>
             <Button variant="outline" size="sm">Masuk</Button>
           </a>
-          <Link href="#contact">
+          <a href={HRD_REGISTER_STARTER_URL}>
             <Button size="sm">Coba Gratis</Button>
-          </Link>
+          </a>
         </div>
       </div>
     </header>

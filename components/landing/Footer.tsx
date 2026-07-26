@@ -1,7 +1,7 @@
 import React from "react";
 import { SiteLogo } from "@/components/svg";
 import Link from "next/link";
-import { HRD_LOGIN_URL } from "@/lib/site";
+import { CONTACT_EMAIL, HRD_LOGIN_URL, WHATSAPP_CONTACTS } from "@/lib/site";
 
 const Footer = () => {
   return (
@@ -23,7 +23,7 @@ const Footer = () => {
               <li><Link href="/" className="hover:text-primary transition-colors">Beranda</Link></li>
               <li><Link href="#features" className="hover:text-primary transition-colors">Fitur</Link></li>
               <li><Link href="#pricing" className="hover:text-primary transition-colors">Harga</Link></li>
-              <li><Link href="#contact" className="hover:text-primary transition-colors">Hubungi Kami</Link></li>
+              <li><Link href="#faq" className="hover:text-primary transition-colors">FAQ</Link></li>
               <li>
                 <a href={HRD_LOGIN_URL} className="hover:text-primary transition-colors">
                   Login Admin
@@ -35,8 +35,26 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-white mb-6">Hubungi Kami</h3>
             <ul className="space-y-4 text-default-400">
               <li>Jakarta, Indonesia</li>
-              <li>info@rekastaff.com</li>
-              <li>+62 812 3456 7890</li>
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
+              {WHATSAPP_CONTACTS.map((contact) => (
+                <li key={contact.e164}>
+                  <a
+                    href={contact.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    WhatsApp {contact.display}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
