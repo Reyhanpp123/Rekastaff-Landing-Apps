@@ -12,7 +12,7 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 deleteDir()
-                }
+            }
         }
 
         stage('Checkout') {
@@ -21,38 +21,48 @@ pipeline {
             }
         }
 
-        stage('Stop Old Containers') {
-            steps {
-                sh '''
-                    docker stop REKASTAFF-Landing-Page
-                '''
-            }
-        }
-
-
         stage('Build Image') {
             steps {
-                echo "🏗 Build Docker image (no cache)"
+                echo "🏗 Building Docker Image..."
                 sh '''
-                    set -x
-                    docker compose build --no-cache
+                    set -e
+                    docker compose -f ${COMPOSE_FILE} build --no-cache
                 '''
             }
         }
 
         stage('Deploy') {
             steps {
+                echo "🚀 Deploying Application..."
                 sh '''
-                    docker compose up -d --force-recreate --remove-orphans
+                    set -e
+
+                    docker compose -f ${COMPOSE_FILE} down || true
+
+                    docker compose -f ${COMPOSE_FILE} up -d \
+                        --build \
+                        --force-recreate \
+                        --remove-orphans
                 '''
             }
         }
 
-
         stage('Verify') {
             steps {
+                echo "🔍 Verifying Container..."
                 sh '''
-                    docker ps | grep REKASTAFF-Landing-Page
+                    docker ps --filter "name=${CONTAINER_NAME}"
+
+                    docker inspect ${CONTAINER_NAME} >/dev/null
+                '''
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                echo "🧹 Cleaning unused Docker images..."
+                sh '''
+                    docker image prune -f
                 '''
             }
         }
@@ -62,8 +72,13 @@ pipeline {
         success {
             echo "✅ DEPLOY SUCCESS"
         }
+
         failure {
             echo "❌ DEPLOY FAILED"
+
+            sh '''
+                docker compose -f ${COMPOSE_FILE} logs --tail=100 || true
+            '''
         }
     }
 }
