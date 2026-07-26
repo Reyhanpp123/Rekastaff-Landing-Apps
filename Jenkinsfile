@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = "REKASTAFF-Web-Apps-Landing-Page"
+        APP_NAME = "REKASTAFF-Landing-Page"
         COMPOSE_FILE = "docker-compose.yml"
-        CONTAINER_NAME = "REKASTAFF-Web-Apps-Landing-Page"
+        CONTAINER_NAME = "REKASTAFF-Landing-Page"
     }
 
     stages {
@@ -24,7 +24,7 @@ pipeline {
         stage('Stop Old Containers') {
             steps {
                 sh '''
-                    docker stop REKASTAFF-Web-Apps-Landing-Page
+                    docker stop REKASTAFF-Landing-Page
                 '''
             }
         }
@@ -52,7 +52,7 @@ pipeline {
         stage('Verify') {
             steps {
                 sh '''
-                    docker ps | grep REKASTAFF-Web-Apps-Landing-Page
+                    docker ps | grep REKASTAFF-Landing-Page
                 '''
             }
         }
