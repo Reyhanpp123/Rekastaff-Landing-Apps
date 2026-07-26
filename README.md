@@ -16,7 +16,20 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Env
 
+| File | Dipakai saat |
+|---|---|
+| `.env` | Development (`npm run dev`) — jangan di-commit |
+| `.env.production` | Production (`npm run build` / `npm start`) |
+| `.env.example` | Template untuk dokumentasi |
+
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
+
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | This landing site URL |
-| `NEXT_PUBLIC_HRD_URL` | HRD app base URL (login CTA target) |
+| `NEXT_PUBLIC_SITE_URL` | URL site landing ini |
+| `NEXT_PUBLIC_HRD_URL` | Base URL app HRD (target CTA login) |
+| `NEXT_PUBLIC_API_URL` | Base URL API (`…/api/`) |

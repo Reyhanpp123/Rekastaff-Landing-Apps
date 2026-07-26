@@ -1,29 +1,51 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Check, 
-  X, 
-  HelpCircle, 
-  Sparkles, 
+import React, { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  Check,
+  HelpCircle,
+  Sparkles,
   Calculator,
-  User, 
-  Coins, 
-  TrendingUp, 
-  UserPlus, 
-  Plane, 
-  DollarSign, 
-  FileText, 
+  Coins,
+  TrendingUp,
+  UserPlus,
+  Plane,
+  DollarSign,
+  FileText,
   MessageSquare,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  Loader2,
+  Puzzle,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { useApi } from "@/hooks/use-api";
+import { billingCatalogURL } from "@/config/apis";
+import {
+  BillingAddon,
+  BillingApiResponse,
+  BillingCatalogData,
+  BillingProduct,
+  estimateProductTotal,
+  getPackageForDuration,
+  getPackageMonths,
+  getRecommendedProduct,
+  isFreeProduct,
+  parseFeatureList,
+} from "@/lib/billing";
+import { HRD_LOGIN_URL } from "@/lib/site";
 
 const formatter = new Intl.NumberFormat("id-ID", {
   style: "currency",
@@ -31,43 +53,92 @@ const formatter = new Intl.NumberFormat("id-ID", {
   minimumFractionDigits: 0,
 });
 
+const ADDON_STYLES: { icon: LucideIcon; color: string; bg: string }[] = [
+  { icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
+  { icon: TrendingUp, color: "text-blue-500", bg: "bg-blue-500/10" },
+  { icon: UserPlus, color: "text-purple-500", bg: "bg-purple-500/10" },
+  { icon: Plane, color: "text-amber-500", bg: "bg-amber-500/10" },
+  { icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  { icon: FileText, color: "text-rose-500", bg: "bg-rose-500/10" },
+  { icon: MessageSquare, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+  { icon: Puzzle, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+];
+
+function getAddonStyle(name: string, index: number) {
+  const n = name.toLowerCase();
+  if (n.includes("gaji") || n.includes("payroll") || n.includes("penggajian")) {
+    return ADDON_STYLES[0];
+  }
+  if (n.includes("kpi") || n.includes("performance") || n.includes("kinerja")) {
+    return ADDON_STYLES[1];
+  }
+  if (n.includes("recruit")) return ADDON_STYLES[2];
+  if (n.includes("dinas") || n.includes("travel")) return ADDON_STYLES[3];
+  if (n.includes("keuangan") || n.includes("finance")) return ADDON_STYLES[4];
+  if (n.includes("dokumen") || n.includes("document")) return ADDON_STYLES[5];
+  if (n.includes("komunikasi") || n.includes("communication")) return ADDON_STYLES[6];
+  return ADDON_STYLES[index % ADDON_STYLES.length];
+}
+
 export default function PricingSection() {
-  const [duration, setDuration] = useState<number>(1); // 1, 3, 6, 12 months
+  const { apiRequest, loading } = useApi();
+  const [products, setProducts] = useState<BillingProduct[]>([]);
+  const [addons, setAddons] = useState<BillingAddon[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [duration, setDuration] = useState<number>(1);
   const [employeeCount, setEmployeeCount] = useState<number>(10);
-  const [activeTab, setActiveTab] = useState<string>("plans"); // plans | addons
+  const [activeTab, setActiveTab] = useState<string>("plans");
 
-  const formatPrice = (val: number) => {
-    return formatter.format(val);
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setFetchError(null);
+        const res = await apiRequest<BillingApiResponse<BillingCatalogData>>(
+          billingCatalogURL,
+          { headers: { Accept: "application/json" } }
+        );
+        if (cancelled) return;
 
-  // Pricing calculations
-  const calculateProPrice = () => {
-    const basePrice = 500000;
-    const maxFreeEmployees = 105;
-    let extraPrice = 0;
-    
-    if (employeeCount > maxFreeEmployees) {
-      const extraCount = employeeCount - maxFreeEmployees;
-      extraPrice = extraCount * 5000;
-    }
-    
-    return (basePrice + extraPrice) * duration;
-  };
+        if (res?.meta?.code !== 200) {
+          setFetchError(res?.meta?.message || "Gagal memuat katalog");
+          return;
+        }
 
-  const calculateCustomPrice = () => {
-    const minEmployees = 100;
-    const count = Math.max(employeeCount, minEmployees);
-    return count * 5000 * duration;
-  };
+        const productList = (res.data?.products || []).filter(
+          (p) => p.prd_status !== "X" && p.prd_status !== "Z"
+        );
+        const addonList = (res.data?.addons || []).filter(
+          (a) => a.addon_status !== "X" && a.addon_status !== "Z"
+        );
 
-  // Determine recommended plan based on employee count
-  const getRecommendedPlan = () => {
-    if (employeeCount <= 5) return "starter";
-    if (employeeCount <= 105) return "pro";
-    return "custom";
-  };
+        setProducts(productList);
+        setAddons(addonList);
+      } catch {
+        if (!cancelled) setFetchError("Gagal memuat katalog");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiRequest]);
 
-  const recommendedPlan = getRecommendedPlan();
+  const formatPrice = (val: number) => formatter.format(val);
+
+  const addonBundleTotal = useMemo(
+    () => addons.reduce((sum, a) => sum + Number(a.addon_price || 0), 0),
+    [addons]
+  );
+
+  const recommended = useMemo(
+    () => getRecommendedProduct(products, employeeCount),
+    [products, employeeCount]
+  );
+
+  const recommendedTotal = useMemo(() => {
+    if (!recommended) return null;
+    return estimateProductTotal(recommended, employeeCount, duration);
+  }, [recommended, employeeCount, duration]);
 
   const handleSliderChange = (value: number[]) => {
     if (value && value.length > 0) {
@@ -76,7 +147,7 @@ export default function PricingSection() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
+    const val = parseInt(e.target.value, 10);
     if (!isNaN(val) && val >= 1) {
       setEmployeeCount(val);
     } else if (e.target.value === "") {
@@ -91,86 +162,111 @@ export default function PricingSection() {
     { value: 12, label: "12 Bulan" },
   ];
 
-  const addons = [
-    {
-      id: "payroll",
-      name: "Payroll (Penggajian)",
-      desc: "Proses penggajian otomatis, BPJS, PPh 21, dan cetak slip gaji secara akurat.",
-      price: 299000,
-      icon: Coins,
-      color: "text-green-500",
-      bg: "bg-green-500/10",
-      features: ["Hitung Gaji Otomatis", "Potongan BPJS & Pajak", "Slip Gaji Digital", "Laporan Penggajian"]
-    },
-    {
-      id: "performance",
-      name: "Performance (Kinerja)",
-      desc: "Kelola KPI, evaluasi kerja (appraisal) 360°, dan lacak target pencapaian karyawan.",
-      price: 199000,
-      icon: TrendingUp,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-      features: ["Sistem KPI Karyawan", "Review Multi-Rater (360°)", "Target Tracking", "Laporan Evaluasi Kinerja"]
-    },
-    {
-      id: "recruitment",
-      name: "Recruitment",
-      desc: "Kelola pipeline rekrutmen mulai dari registrasi kandidat, tahap seleksi, hingga onboarding.",
-      price: 199000,
-      icon: UserPlus,
-      color: "text-purple-500",
-      bg: "bg-purple-500/10",
-      features: ["Portal Lowongan Kerja", "Pelacakan Kandidat (ATS)", "Jadwal Wawancara", "Onboarding Checklist"]
-    },
-    {
-      id: "travel",
-      name: "Travel (Perjalanan Dinas)",
-      desc: "Kelola permohonan dinas luar kota, approval alur kerja, pengeluaran, dan klaim reimburse.",
-      price: 149000,
-      icon: Plane,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-      features: ["Pengajuan Dinas Luar", "Multi-Level Approval", "Pencatatan Biaya (Reimburse)", "Laporan Perjalanan"]
-    },
-    {
-      id: "finance",
-      name: "Finance (Keuangan)",
-      desc: "Manajemen transaksi internal, pengajuan pinjaman karyawan, kas bon, dan angsuran.",
-      price: 199000,
-      icon: DollarSign,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-      features: ["Pinjaman & Kas Bon", "Skema Angsuran Gaji", "Klaim Pengeluaran", "Laporan Keuangan HR"]
-    },
-    {
-      id: "documents",
-      name: "Advanced Documents",
-      desc: "Buat, tanda tangani, dan kelola kontrak kerja, kebijakan perusahaan, serta surat peringatan (SP).",
-      price: 99000,
-      icon: FileText,
-      color: "text-rose-500",
-      bg: "bg-rose-500/10",
-      features: ["Template Kontrak Kerja", "E-Sign Digital", "Surat Peringatan & Teguran", "Repository Kebijakan"]
-    },
-    {
-      id: "communication",
-      name: "Internal Communication",
-      desc: "Bagikan pengumuman perusahaan, direktori staf interaktif, dan pesan internal tim.",
-      price: 99000,
-      icon: MessageSquare,
-      color: "text-cyan-500",
-      bg: "bg-cyan-500/10",
-      features: ["Papan Pengumuman Digital", "Direktori Kontak Pegawai", "Pesan Kilat Internal", "Notifikasi Instan"]
+  const renderProductPrice = (product: BillingProduct) => {
+    if (isFreeProduct(product)) {
+      return (
+        <>
+          <span className="text-4xl font-extrabold text-default-900">Rp 0</span>
+          <span className="text-default-500 text-sm font-semibold"> / gratis</span>
+        </>
+      );
     }
-  ];
+
+    const pkg = getPackageForDuration(product, duration);
+    const paytype = (pkg?.pkg_paytype || product.prd_paytype || "package").toLowerCase();
+    const months = pkg ? getPackageMonths(pkg) || duration : duration;
+
+    if (pkg && paytype === "personal") {
+      const rate = Number(pkg.pkg_price || product.prd_price_extra_employee || 0);
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-extrabold text-default-900">
+              {formatPrice(rate)}
+            </span>
+            <span className="text-default-500 text-sm font-semibold">
+              / karyawan / bulan
+            </span>
+          </div>
+          {Number(product.prd_min_employee || 0) > 0 && (
+            <span className="text-xs text-default-400 font-semibold mt-1">
+              Minimal {product.prd_min_employee} karyawan
+              {Number(pkg.pkg_price_min || 0) > 0
+                ? ` · min ${formatPrice(Number(pkg.pkg_price_min))} / ${months} bln`
+                : ""}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (pkg) {
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-extrabold text-default-900">
+              {formatPrice(Number(pkg.pkg_price || 0))}
+            </span>
+            <span className="text-default-500 text-sm font-semibold">
+              / {months} Bulan
+            </span>
+          </div>
+          {months > 0 && (
+            <span className="text-xs text-default-400 font-semibold mt-1">
+              Setara {formatPrice(Math.round(Number(pkg.pkg_price) / months))} / bulan
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    const extra = Number(product.prd_price_extra_employee || 0);
+    if (product.prd_paytype === "personal" && extra > 0) {
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-extrabold text-default-900">
+              {formatPrice(extra)}
+            </span>
+            <span className="text-default-500 text-sm font-semibold">
+              / karyawan / bulan
+            </span>
+          </div>
+          {Number(product.prd_min_employee || 0) > 0 && (
+            <span className="text-xs text-default-400 font-semibold mt-1">
+              Minimal {product.prd_min_employee} karyawan
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (extra > 0) {
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-semibold text-default-600">
+              Extra karyawan {formatPrice(extra)} / kary / bulan
+            </span>
+          </div>
+          <span className="text-xs text-default-400 font-semibold mt-1">
+            Lihat kalkulator untuk estimasi total
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <span className="text-lg font-bold text-default-700">Hubungi Sales</span>
+    );
+  };
 
   return (
     <section id="pricing" className="py-24 bg-default-50/30 overflow-hidden relative">
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-      
+
       <div className="container px-4 sm:px-8 font-sans">
-        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge className="mb-4 text-xs px-4 py-1" color="default" variant="soft">
             <Sparkles className="h-3.5 w-3.5 mr-2 inline text-primary" /> Harga Fleksibel & Transparan
@@ -183,14 +279,13 @@ export default function PricingSection() {
           </p>
         </div>
 
-        {/* Tab Selector: Plans vs Addons */}
         <div className="flex justify-center mb-12">
           <div className="inline-flex p-1.5 bg-default-100 rounded-full border shadow-sm">
             <button
               onClick={() => setActiveTab("plans")}
               className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-                activeTab === "plans" 
-                  ? "bg-primary text-primary-foreground shadow-md" 
+                activeTab === "plans"
+                  ? "bg-primary text-primary-foreground shadow-md"
                   : "text-default-600 hover:text-primary"
               }`}
             >
@@ -199,8 +294,8 @@ export default function PricingSection() {
             <button
               onClick={() => setActiveTab("addons")}
               className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-                activeTab === "addons" 
-                  ? "bg-primary text-primary-foreground shadow-md" 
+                activeTab === "addons"
+                  ? "bg-primary text-primary-foreground shadow-md"
                   : "text-default-600 hover:text-primary"
               }`}
             >
@@ -213,11 +308,9 @@ export default function PricingSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
             className="space-y-16"
           >
-            {/* Interactive Calculator Section */}
             <div className="max-w-4xl mx-auto bg-card rounded-3xl border p-8 md:p-10 shadow-lg relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none" />
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -228,11 +321,12 @@ export default function PricingSection() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-default-900">Kalkulator Karyawan</h3>
-                      <p className="text-sm text-default-500">Sesuaikan jumlah karyawan untuk menemukan paket & harga terbaik.</p>
+                      <p className="text-sm text-default-500">
+                        Sesuaikan jumlah karyawan untuk menemukan paket & harga terbaik.
+                      </p>
                     </div>
                   </div>
 
-                  {/* Slider Control */}
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <label className="text-sm font-semibold text-default-700">Jumlah Karyawan:</label>
@@ -247,7 +341,7 @@ export default function PricingSection() {
                         <span className="text-sm text-default-500 font-semibold">Orang</span>
                       </div>
                     </div>
-                    
+
                     <Slider
                       value={[employeeCount]}
                       min={1}
@@ -259,12 +353,11 @@ export default function PricingSection() {
                     <div className="flex justify-between text-xs text-default-400 font-medium">
                       <span>1 Karyawan</span>
                       <span>50 Karyawan</span>
-                      <span>105 Karyawan (Bonus Free)</span>
+                      <span>100 Karyawan</span>
                       <span>200+ Karyawan</span>
                     </div>
                   </div>
 
-                  {/* Duration Selector inside Calculator */}
                   <div className="space-y-3">
                     <span className="text-sm font-semibold text-default-700 block">Siklus Pembayaran:</span>
                     <div className="grid grid-cols-4 gap-2">
@@ -287,316 +380,266 @@ export default function PricingSection() {
 
                 <div className="lg:col-span-5 bg-default-50/50 p-6 md:p-8 rounded-2xl border flex flex-col justify-between h-full space-y-6">
                   <div>
-                    <span className="text-xs font-bold text-default-500 uppercase tracking-wider">Rekomendasi Paket</span>
-                    <h4 className="text-2xl font-extrabold text-default-900 mt-1 capitalize">
-                      {recommendedPlan === "starter" ? "Starter (Free)" : recommendedPlan === "pro" ? "Professional (Pro)" : "Enterprise (Custom)"}
+                    <span className="text-xs font-bold text-default-500 uppercase tracking-wider">
+                      Rekomendasi Paket
+                    </span>
+                    <h4 className="text-2xl font-extrabold text-default-900 mt-1">
+                      {recommended?.prd_name || (loading ? "Memuat..." : "—")}
                     </h4>
                     <p className="text-sm text-default-600 mt-2">
-                      {recommendedPlan === "starter" && "Sangat cocok untuk startup atau UMKM skala mikro."}
-                      {recommendedPlan === "pro" && "Pilihan ideal untuk perusahaan menengah dengan fitur HR lengkap."}
-                      {recommendedPlan === "custom" && "Solusi terbaik untuk perusahaan besar berskala enterprise."}
+                      {recommended?.prd_desc ||
+                        "Geser jumlah karyawan untuk melihat rekomendasi paket."}
                     </p>
                   </div>
 
                   <div className="border-t border-dashed pt-4">
-                    <span className="text-xs text-default-400 font-semibold block">Estimasi Biaya ({duration} Bulan):</span>
+                    <span className="text-xs text-default-400 font-semibold block">
+                      Estimasi Biaya ({duration} Bulan):
+                    </span>
                     <div className="flex items-baseline gap-1 mt-1">
                       <span className="text-3xl font-extrabold text-primary">
-                        {recommendedPlan === "starter" ? "Gratis" : formatPrice(recommendedPlan === "pro" ? calculateProPrice() : calculateCustomPrice())}
+                        {recommendedTotal === 0
+                          ? "Gratis"
+                          : recommendedTotal != null
+                            ? formatPrice(recommendedTotal)
+                            : "Hubungi Sales"}
                       </span>
-                      {recommendedPlan !== "starter" && (
+                      {recommendedTotal != null && recommendedTotal > 0 && (
                         <span className="text-sm text-default-500 font-semibold">/ total</span>
                       )}
                     </div>
-                    {recommendedPlan === "pro" && employeeCount > 105 && (
-                      <span className="text-xs text-emerald-600 font-medium block mt-1">
-                        *Termasuk biaya {employeeCount - 105} extra karyawan: {formatPrice((employeeCount - 105) * 5000 * duration)}
-                      </span>
-                    )}
+                    {recommended &&
+                      Number(recommended.prd_price_extra_employee || 0) > 0 &&
+                      employeeCount > Number(recommended.prd_max_employee || 0) && (
+                        <span className="text-xs text-emerald-600 font-medium block mt-1">
+                          *Termasuk biaya {employeeCount - Number(recommended.prd_max_employee)} extra
+                          karyawan:{" "}
+                          {formatPrice(
+                            (employeeCount - Number(recommended.prd_max_employee)) *
+                              Number(recommended.prd_price_extra_employee) *
+                              duration
+                          )}
+                        </span>
+                      )}
                   </div>
 
-                  <Link href="#contact" className="w-full">
+                  <a href={HRD_LOGIN_URL} className="w-full">
                     <Button className="w-full font-bold group h-12 text-sm shadow-md">
-                      Mulai Sekarang 
+                      Mulai Sekarang
                       <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Button>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
 
-            {/* Three Main Plans Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-              
-              {/* STARTER PLAN */}
-              <Card className={`flex flex-col relative transition-all duration-300 hover:shadow-xl border-t-4 ${
-                recommendedPlan === "starter" 
-                  ? "border-primary shadow-lg scale-105 md:scale-[1.03] z-10" 
-                  : "border-default-200"
-              }`}>
-                {recommendedPlan === "starter" && (
-                  <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2">
-                    <Badge className="bg-primary text-primary-foreground font-bold px-3 py-1 text-xs">REKOMENDASI</Badge>
-                  </div>
-                )}
-                <CardHeader className="p-8">
-                  <CardTitle className="text-2xl font-bold text-default-900">Starter</CardTitle>
-                  <CardDescription className="text-sm text-default-500 mt-2 min-h-[40px]">
-                    Kelola administrasi HR dasar tim kecil Anda secara efisien.
-                  </CardDescription>
-                  <div className="mt-6 flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-default-900">Rp 0</span>
-                    <span className="text-default-500 text-sm font-semibold">/ gratis selamanya</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-8 pt-0 flex-grow border-t">
-                  <ul className="space-y-4 text-sm text-default-600 mt-6">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Maksimal <strong>5 karyawan</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Dashboard & Overview dasar</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Absensi Online (Clock In/Out) & GPS</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Kelola & Approval Cuti (Maks 3 jenis)</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>1 Kantor Cabang</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Data Master Divisi & Posisi (Maks 5)</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-default-300">
-                      <X className="h-5 w-5 text-default-300 shrink-0 mt-0.5" />
-                      <span className="line-through">Shift & Lembur Karyawan</span>
-                    </li>
-                    <li className="flex items-start gap-3 text-default-300">
-                      <X className="h-5 w-5 text-default-300 shrink-0 mt-0.5" />
-                      <span className="line-through">Laporan HR Lengkap (Excel/PDF)</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter className="p-8 border-t bg-default-50/50">
-                  <Link href="#contact" className="w-full">
-                    <Button variant="outline" className="w-full font-bold h-11 text-sm">
-                      Daftar Gratis
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+            {loading && !products.length ? (
+              <div className="flex justify-center py-16 text-default-500 gap-2 items-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Memuat paket...
+              </div>
+            ) : fetchError ? (
+              <div className="max-w-xl mx-auto text-center py-12 space-y-3">
+                <HelpCircle className="h-8 w-8 text-default-400 mx-auto" />
+                <p className="text-sm text-default-600">{fetchError}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+                {products.map((product) => {
+                  const features = parseFeatureList(product.prd_features);
+                  const isRecommended = recommended?.prd_idx === product.prd_idx;
+                  const nameLower = (product.prd_name || "").toLowerCase();
+                  const isPopular =
+                    nameLower.includes("pro") && !nameLower.includes("starter");
 
-              {/* PRO PLAN */}
-              <Card className={`flex flex-col relative transition-all duration-300 hover:shadow-2xl border-t-4 ${
-                recommendedPlan === "pro" 
-                  ? "border-primary shadow-xl scale-105 md:scale-[1.05] z-10" 
-                  : "border-primary/50"
-              }`}>
-                <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 flex gap-1">
-                  <Badge className="bg-amber-500 text-white font-bold px-3 py-1 text-xs">TERLARIS</Badge>
-                  {recommendedPlan === "pro" && (
-                    <Badge className="bg-primary text-primary-foreground font-bold px-3 py-1 text-xs">REKOMENDASI</Badge>
-                  )}
-                </div>
-                
-                <CardHeader className="p-8">
-                  <CardTitle className="text-2xl font-bold text-default-900">Pro</CardTitle>
-                  <CardDescription className="text-sm text-default-500 mt-2 min-h-[40px]">
-                    Solusi HR lengkap untuk kemudahan operasional tim Anda.
-                  </CardDescription>
-                  <div className="mt-6 flex flex-col">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-extrabold text-default-900">
-                        {formatPrice(500000 * duration)}
-                      </span>
-                      <span className="text-default-500 text-sm font-semibold">/ {duration} Bulan</span>
-                    </div>
-                    <span className="text-xs text-default-400 font-semibold mt-1">Setara {formatPrice(500000)} / bulan</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-8 pt-0 flex-grow border-t">
-                  <ul className="space-y-4 text-sm text-default-600 mt-6">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Maksimal <strong>105 karyawan</strong> (100 + 5 bonus Free)</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Semua fitur paket <strong>Starter</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Manajemen Shift & Lembur Karyawan</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Cuti Tanpa Batas (Unlimited Jenis) & Kalender Cuti</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Kehadiran Manual & Workflow Resign / Onboarding</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Multi Kantor Cabang & Multi-user RBAC</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Laporan Lengkap & Ekspor / Impor Data Excel</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Extra karyawan: <strong>Rp 5.000 / kary / bulan</strong></span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter className="p-8 border-t bg-primary/[0.02]">
-                  <Link href="#contact" className="w-full">
-                    <Button className="w-full font-bold h-11 text-sm shadow-md">
-                      Pilih Paket Pro
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
+                  return (
+                    <Card
+                      key={product.prd_idx}
+                      className={`flex flex-col relative transition-all duration-300 hover:shadow-xl border-t-4 ${
+                        isRecommended
+                          ? "border-primary shadow-lg scale-105 md:scale-[1.03] z-10"
+                          : isPopular
+                            ? "border-primary/50"
+                            : "border-default-200"
+                      }`}
+                    >
+                      <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 flex gap-1">
+                        {isPopular && (
+                          <Badge className="bg-amber-500 text-white font-bold px-3 py-1 text-xs">
+                            TERLARIS
+                          </Badge>
+                        )}
+                        {isRecommended && (
+                          <Badge className="bg-primary text-primary-foreground font-bold px-3 py-1 text-xs">
+                            REKOMENDASI
+                          </Badge>
+                        )}
+                      </div>
 
-              {/* CUSTOM PLAN */}
-              <Card className={`flex flex-col relative transition-all duration-300 hover:shadow-xl border-t-4 ${
-                recommendedPlan === "custom" 
-                  ? "border-primary shadow-lg scale-105 md:scale-[1.03] z-10" 
-                  : "border-default-200"
-              }`}>
-                {recommendedPlan === "custom" && (
-                  <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2">
-                    <Badge className="bg-primary text-primary-foreground font-bold px-3 py-1 text-xs">REKOMENDASI</Badge>
-                  </div>
-                )}
-                <CardHeader className="p-8">
-                  <CardTitle className="text-2xl font-bold text-default-900">Custom</CardTitle>
-                  <CardDescription className="text-sm text-default-500 mt-2 min-h-[40px]">
-                    Solusi fleksibel per karyawan untuk perusahaan skala besar.
-                  </CardDescription>
-                  <div className="mt-6 flex flex-col">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-extrabold text-default-900">Rp 5.000</span>
-                      <span className="text-default-500 text-sm font-semibold">/ karyawan / bulan</span>
-                    </div>
-                    <span className="text-xs text-default-400 font-semibold mt-1">Minimal 100 karyawan (+5 bonus Free)</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-8 pt-0 flex-grow border-t">
-                  <ul className="space-y-4 text-sm text-default-600 mt-6">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Kapasitas karyawan sesuai kebutuhan (100+)</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Semua fitur paket <strong>Pro</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Bonus kuota tetap <strong>+5 karyawan gratis</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Akses penuh ke semua master data tanpa batas</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Perpanjangan & aktivasi modul Pro+ instan</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Dedicated Support (Manajer Akun Khusus)</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
-                      <span>Service Level Agreement (SLA) terjamin</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter className="p-8 border-t bg-default-50/50">
-                  <Link href="#contact" className="w-full">
-                    <Button variant="outline" className="w-full font-bold h-11 text-sm">
-                      Hubungi Sales
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            </div>
+                      <CardHeader className="p-8">
+                        <CardTitle className="text-2xl font-bold text-default-900">
+                          {product.prd_name}
+                        </CardTitle>
+                        <CardDescription className="text-sm text-default-500 mt-2 min-h-[40px]">
+                          {product.prd_desc}
+                        </CardDescription>
+                        <div className="mt-6 flex items-baseline gap-1 flex-wrap">
+                          {renderProductPrice(product)}
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="p-8 pt-0 flex-grow border-t">
+                        <ul className="space-y-4 text-sm text-default-600 mt-6">
+                          {features.map((feat, idx) => (
+                            <li key={idx} className="flex items-start gap-3">
+                              <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                          {Number(product.prd_price_extra_employee || 0) > 0 &&
+                            product.prd_paytype === "package" && (
+                              <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                                <span>
+                                  Extra karyawan:{" "}
+                                  <strong>
+                                    {formatPrice(Number(product.prd_price_extra_employee))} / kary /
+                                    bulan
+                                  </strong>
+                                </span>
+                              </li>
+                            )}
+                        </ul>
+                      </CardContent>
+
+                      <CardFooter
+                        className={`p-8 border-t ${
+                          isPopular || isRecommended
+                            ? "bg-primary/[0.02]"
+                            : "bg-default-50/50"
+                        }`}
+                      >
+                        <a href={HRD_LOGIN_URL} className="w-full">
+                          <Button
+                            variant={isPopular || isRecommended ? undefined : "outline"}
+                            className="w-full font-bold h-11 text-sm"
+                          >
+                            {isFreeProduct(product)
+                              ? "Daftar Gratis"
+                              : product.prd_paytype === "personal"
+                                ? "Hubungi Sales"
+                                : `Pilih Paket ${product.prd_name}`}
+                          </Button>
+                        </a>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
             className="space-y-12 max-w-6xl mx-auto"
           >
-            {/* Addons Info Banner */}
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-sm">
               <div className="space-y-2 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-2">
                   <ShieldCheck className="h-5 w-5 text-primary" />
-                  <h3 className="font-bold text-lg text-default-900">Modul Tambahan Pro+ (Add-on)</h3>
+                  <h3 className="font-bold text-lg text-default-900">
+                    Modul Tambahan Pro+ (Add-on)
+                  </h3>
                 </div>
                 <p className="text-sm text-default-600 max-w-2xl">
-                  Beli modul yang dibutuhkan secara terpisah. Pembayaran dilakukan **sekali untuk selamanya (lifetime access)**. Modul tetap dapat diakses meskipun masa berlangganan bulanan utama Anda habis.
+                  Beli modul yang dibutuhkan secara terpisah. Pembayaran dilakukan sekali untuk
+                  selamanya (lifetime access). Modul tetap dapat diakses meskipun masa
+                  berlangganan bulanan utama Anda habis.
                 </p>
               </div>
-              <div className="text-center md:text-right shrink-0 bg-primary text-primary-foreground px-5 py-3 rounded-xl shadow-md">
-                <span className="text-xs uppercase font-bold tracking-wider opacity-90 block">Promo Paket Lengkap</span>
-                <span className="text-xl font-black block mt-0.5">Hanya Rp 1.243.000</span>
-                <span className="text-xs opacity-75 font-semibold">Untuk Semua 7 Modul Permanen</span>
-              </div>
+              {addonBundleTotal > 0 && (
+                <div className="text-center md:text-right shrink-0 bg-primary text-primary-foreground px-5 py-3 rounded-xl shadow-md">
+                  <span className="text-xs uppercase font-bold tracking-wider opacity-90 block">
+                    Total Semua Modul
+                  </span>
+                  <span className="text-xl font-black block mt-0.5">
+                    {formatPrice(addonBundleTotal)}
+                  </span>
+                  <span className="text-xs opacity-75 font-semibold">
+                    {addons.length} modul · sekali bayar
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Addons Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {addons.map((addon) => {
-                const IconComponent = addon.icon;
-                return (
-                  <Card key={addon.id} className="flex flex-col hover:shadow-md transition-shadow duration-300 border-none bg-card shadow-sm">
-                    <CardHeader className="p-6 pb-4">
-                      <div className="flex items-start justify-between">
-                        <div className={`w-10 h-10 rounded-lg ${addon.bg} flex items-center justify-center`}>
-                          <IconComponent className={`h-5 w-5 ${addon.color}`} />
+            {loading && !addons.length ? (
+              <div className="flex justify-center py-12 text-default-500 gap-2 items-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Memuat add-on...
+              </div>
+            ) : !addons.length ? (
+              <div className="text-center py-12 text-sm text-default-500">
+                Belum ada modul add-on tersedia.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {addons.map((addon, index) => {
+                  const style = getAddonStyle(addon.addon_name, index);
+                  const IconComponent = style.icon;
+                  const features = parseFeatureList(addon.addon_features);
+                  const price = Number(addon.addon_price || 0);
+
+                  return (
+                    <Card
+                      key={addon.addon_idx}
+                      className="flex flex-col hover:shadow-md transition-shadow duration-300 border-none bg-card shadow-sm"
+                    >
+                      <CardHeader className="p-6 pb-4">
+                        <div className="flex items-start justify-between">
+                          <div
+                            className={`w-10 h-10 rounded-lg ${style.bg} flex items-center justify-center`}
+                          >
+                            <IconComponent className={`h-5 w-5 ${style.color}`} />
+                          </div>
+                          <Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold py-0.5 px-2">
+                            ONE-TIME
+                          </Badge>
                         </div>
-                        <Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold py-0.5 px-2">
-                          ONE-TIME
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-lg font-bold text-default-900 mt-4">{addon.name}</CardTitle>
-                      <CardDescription className="text-sm text-default-500 mt-1 min-h-[60px]">
-                        {addon.desc}
-                      </CardDescription>
-                      <div className="mt-3">
-                        <span className="text-xl font-bold text-primary">{formatPrice(addon.price)}</span>
-                        <span className="text-xs text-default-400 font-semibold"> / sekali bayar</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-6 pt-0 flex-grow border-t">
-                      <ul className="space-y-2.5 text-xs text-default-600 mt-4">
-                        {addon.features.map((feat, fIdx) => (
-                          <li key={fIdx} className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-emerald-500 shrink-0" />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                        <CardTitle className="text-lg font-bold text-default-900 mt-4">
+                          {addon.addon_name}
+                        </CardTitle>
+                        <CardDescription className="text-sm text-default-500 mt-1 min-h-[60px]">
+                          {addon.addon_desc}
+                        </CardDescription>
+                        <div className="mt-3">
+                          <span className="text-xl font-bold text-primary">
+                            {price > 0 ? formatPrice(price) : "Gratis"}
+                          </span>
+                          {price > 0 && (
+                            <span className="text-xs text-default-400 font-semibold">
+                              {" "}
+                              / sekali bayar
+                            </span>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-6 pt-0 flex-grow border-t">
+                        <ul className="space-y-2.5 text-xs text-default-600 mt-4">
+                          {features.map((feat, fIdx) => (
+                            <li key={fIdx} className="flex items-center gap-2">
+                              <Check className="h-4 w-4 text-emerald-500 shrink-0" />
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         )}
       </div>
