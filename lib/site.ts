@@ -1,12 +1,7 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://rekastaff.com";
 
-const DEFAULT_HRD_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3001"
-    : "https://hrd.rekastaff.com";
-
-export const HRD_URL = process.env.NEXT_PUBLIC_HRD_URL || DEFAULT_HRD_URL;
+export const HRD_URL = process.env.NEXT_PUBLIC_HRD_URL;
 
 export const HRD_LOGIN_URL = `${HRD_URL}/en/auth/login`;
 

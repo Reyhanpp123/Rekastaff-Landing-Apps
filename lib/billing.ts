@@ -114,18 +114,37 @@ export function getPackageForDuration(
     (p) => p.pkg_status !== "X" && p.pkg_status !== "Z"
   );
   if (!packages.length) return null;
-  return (
-    packages.find((p) => getPackageMonths(p) === durationMonths) ||
-    packages[0] ||
-    null
-  );
+  return packages.find((p) => getPackageMonths(p) === durationMonths) || null;
+}
+
+/** Active package durations for the given product(s), sorted ascending. */
+export function getAvailableDurations(
+  products: BillingProduct[]
+): { value: number; label: string }[] {
+  const byMonths = new Map<number, string>();
+
+  for (const product of products) {
+    for (const pkg of product.packages || []) {
+      if (pkg.pkg_status === "X" || pkg.pkg_status === "Z") continue;
+      const months = getPackageMonths(pkg);
+      if (months <= 0) continue;
+      if (!byMonths.has(months)) {
+        byMonths.set(months, pkg.pkg_desc?.trim() || `${months} Bulan`);
+      }
+    }
+  }
+
+  return Array.from(byMonths.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([value, label]) => ({ value, label }));
 }
 
 /**
  * Estimasi total biaya untuk durasi (bulan).
- * - package: pkg_price (+ extra karyawan di atas max × rate × months)
- * - personal: max(employees, min) × pkg_price × months (floor pkg_price_min)
+ * - package: pkg_price flat untuk periode (tidak × jumlah karyawan)
+ * - personal: jumlah karyawan × pkg_price × months
  * - free → 0
+ * Catatan: pkg_price_min tidak dipakai.
  */
 export function estimateProductTotal(
   product: BillingProduct,
@@ -139,14 +158,14 @@ export function estimateProductTotal(
   const maxEmp = Number(product.prd_max_employee || 0);
   const minEmp = Number(product.prd_min_employee || 0);
   const paytype = (pkg?.pkg_paytype || product.prd_paytype || "package").toLowerCase();
+  const count = Math.max(employeeCount, 1);
 
   if (!pkg) {
     if (paytype === "personal" && extraRate > 0) {
-      const count = Math.max(employeeCount, minEmp);
-      return count * extraRate * durationMonths;
+      return Math.max(count, minEmp) * extraRate * durationMonths;
     }
-    if (extraRate > 0 && employeeCount > maxEmp) {
-      return (employeeCount - maxEmp) * extraRate * durationMonths;
+    if (extraRate > 0 && count > maxEmp) {
+      return (count - maxEmp) * extraRate * durationMonths;
     }
     return null;
   }
@@ -156,16 +175,12 @@ export function estimateProductTotal(
   if (paytype === "personal") {
     const rate = Number(pkg.pkg_price || extraRate || 0);
     if (rate <= 0) return null;
-    const count = Math.max(employeeCount, minEmp);
-    let total = count * rate * months;
-    const priceMin = Number(pkg.pkg_price_min || 0);
-    if (priceMin > 0) total = Math.max(total, priceMin);
-    return total;
+    return count * rate * months;
   }
 
   let total = Number(pkg.pkg_price || 0);
-  if (employeeCount > maxEmp && extraRate > 0) {
-    total += (employeeCount - maxEmp) * extraRate * months;
+  if (count > maxEmp && extraRate > 0) {
+    total += (count - maxEmp) * extraRate * months;
   }
   return total;
 }

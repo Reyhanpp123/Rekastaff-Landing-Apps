@@ -39,6 +39,7 @@ import {
   BillingCatalogData,
   BillingProduct,
   estimateProductTotal,
+  getAvailableDurations,
   getPackageForDuration,
   getPackageMonths,
   getRecommendedProduct,
@@ -86,7 +87,7 @@ export default function PricingSection() {
   const [addons, setAddons] = useState<BillingAddon[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [duration, setDuration] = useState<number>(1);
-  const [employeeCount, setEmployeeCount] = useState<number>(10);
+  const [employeeCount, setEmployeeCount] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<string>("plans");
 
   useEffect(() => {
@@ -140,6 +141,32 @@ export default function PricingSection() {
     return estimateProductTotal(recommended, employeeCount, duration);
   }, [recommended, employeeCount, duration]);
 
+  const recommendedPkg = useMemo(
+    () => (recommended ? getPackageForDuration(recommended, duration) : null),
+    [recommended, duration]
+  );
+
+  const recommendedPaytype = (
+    recommendedPkg?.pkg_paytype ||
+    recommended?.prd_paytype ||
+    "package"
+  ).toLowerCase();
+
+  const durations = useMemo(
+    () => getAvailableDurations(recommended ? [recommended] : []),
+    [recommended]
+  );
+
+  useEffect(() => {
+    if (!durations.length) return;
+    if (!durations.some((d) => d.value === duration)) {
+      setDuration(durations[0].value);
+    }
+  }, [durations, duration]);
+
+  const selectedDurationLabel =
+    durations.find((d) => d.value === duration)?.label || `${duration} Bulan`;
+
   const handleSliderChange = (value: number[]) => {
     if (value && value.length > 0) {
       setEmployeeCount(value[0]);
@@ -170,13 +197,6 @@ export default function PricingSection() {
     ? getProductRegisterUrl(recommended)
     : buildRegisterUrl({ prd_idx: STARTER_PRD_IDX });
 
-  const durations = [
-    { value: 1, label: "1 Bulan" },
-    { value: 3, label: "3 Bulan" },
-    { value: 6, label: "6 Bulan" },
-    { value: 12, label: "12 Bulan" },
-  ];
-
   const renderProductPrice = (product: BillingProduct) => {
     if (isFreeProduct(product)) {
       return (
@@ -206,9 +226,6 @@ export default function PricingSection() {
           {Number(product.prd_min_employee || 0) > 0 && (
             <span className="text-xs text-default-400 font-semibold mt-1">
               Minimal {product.prd_min_employee} karyawan
-              {Number(pkg.pkg_price_min || 0) > 0
-                ? ` · min ${formatPrice(Number(pkg.pkg_price_min))} / ${months} bln`
-                : ""}
             </span>
           )}
         </div>
@@ -326,128 +343,6 @@ export default function PricingSection() {
             transition={{ duration: 0.5 }}
             className="space-y-16"
           >
-            <div className="max-w-4xl mx-auto bg-card rounded-3xl border p-8 md:p-10 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none" />
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <div className="lg:col-span-7 space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <Calculator className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-default-900">Kalkulator Karyawan</h3>
-                      <p className="text-sm text-default-500">
-                        Sesuaikan jumlah karyawan untuk menemukan paket & harga terbaik.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <label className="text-sm font-semibold text-default-700">Jumlah Karyawan:</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={employeeCount}
-                          onChange={handleInputChange}
-                          className="w-20 px-3 py-1.5 text-center border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-bold bg-background text-foreground"
-                          min="1"
-                        />
-                        <span className="text-sm text-default-500 font-semibold">Orang</span>
-                      </div>
-                    </div>
-
-                    <Slider
-                      value={[employeeCount]}
-                      min={1}
-                      max={200}
-                      step={1}
-                      onValueChange={handleSliderChange}
-                      className="py-4"
-                    />
-                    <div className="flex justify-between text-xs text-default-400 font-medium">
-                      <span>1 Karyawan</span>
-                      <span>50 Karyawan</span>
-                      <span>100 Karyawan</span>
-                      <span>200+ Karyawan</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <span className="text-sm font-semibold text-default-700 block">Siklus Pembayaran:</span>
-                    <div className="grid grid-cols-4 gap-2">
-                      {durations.map((d) => (
-                        <button
-                          key={d.value}
-                          onClick={() => setDuration(d.value)}
-                          className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all ${
-                            duration === d.value
-                              ? "bg-primary/10 border-primary text-primary shadow-sm"
-                              : "bg-background border-default-200 text-default-600 hover:border-default-400"
-                          }`}
-                        >
-                          {d.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-5 bg-default-50/50 p-6 md:p-8 rounded-2xl border flex flex-col justify-between h-full space-y-6">
-                  <div>
-                    <span className="text-xs font-bold text-default-500 uppercase tracking-wider">
-                      Rekomendasi Paket
-                    </span>
-                    <h4 className="text-2xl font-extrabold text-default-900 mt-1">
-                      {recommended?.prd_name || (loading ? "Memuat..." : "—")}
-                    </h4>
-                    <p className="text-sm text-default-600 mt-2">
-                      {recommended?.prd_desc ||
-                        "Geser jumlah karyawan untuk melihat rekomendasi paket."}
-                    </p>
-                  </div>
-
-                  <div className="border-t border-dashed pt-4">
-                    <span className="text-xs text-default-400 font-semibold block">
-                      Estimasi Biaya ({duration} Bulan):
-                    </span>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-3xl font-extrabold text-primary">
-                        {recommendedTotal === 0
-                          ? "Gratis"
-                          : recommendedTotal != null
-                            ? formatPrice(recommendedTotal)
-                            : "Hubungi Sales"}
-                      </span>
-                      {recommendedTotal != null && recommendedTotal > 0 && (
-                        <span className="text-sm text-default-500 font-semibold">/ total</span>
-                      )}
-                    </div>
-                    {recommended &&
-                      Number(recommended.prd_price_extra_employee || 0) > 0 &&
-                      employeeCount > Number(recommended.prd_max_employee || 0) && (
-                        <span className="text-xs text-emerald-600 font-medium block mt-1">
-                          *Termasuk biaya {employeeCount - Number(recommended.prd_max_employee)} extra
-                          karyawan:{" "}
-                          {formatPrice(
-                            (employeeCount - Number(recommended.prd_max_employee)) *
-                              Number(recommended.prd_price_extra_employee) *
-                              duration
-                          )}
-                        </span>
-                      )}
-                  </div>
-
-                  <a href={recommendedRegisterUrl} className="w-full">
-                    <Button className="w-full font-bold group h-12 text-sm shadow-md">
-                      Mulai Sekarang
-                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </a>
-                </div>
-              </div>
-            </div>
-
             {loading && !products.length ? (
               <div className="flex justify-center py-16 text-default-500 gap-2 items-center">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -553,6 +448,170 @@ export default function PricingSection() {
                 })}
               </div>
             )}
+
+            <div className="max-w-4xl mx-auto bg-card rounded-3xl border p-8 md:p-10 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-xl pointer-events-none" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <Calculator className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-default-900">Kalkulator Karyawan</h3>
+                      <p className="text-sm text-default-500">
+                        Sesuaikan jumlah karyawan untuk menemukan paket & harga terbaik.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <label className="text-sm font-semibold text-default-700">Jumlah Karyawan:</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={employeeCount}
+                          onChange={handleInputChange}
+                          className="w-20 px-3 py-1.5 text-center border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-bold bg-background text-foreground"
+                          min="1"
+                        />
+                        <span className="text-sm text-default-500 font-semibold">Orang</span>
+                      </div>
+                    </div>
+
+                    <Slider
+                      value={[employeeCount]}
+                      min={1}
+                      max={200}
+                      step={1}
+                      onValueChange={handleSliderChange}
+                      className="py-4"
+                    />
+                    <div className="flex justify-between text-xs text-default-400 font-medium">
+                      <span>1 Karyawan</span>
+                      <span>50 Karyawan</span>
+                      <span>100 Karyawan</span>
+                      <span>200+ Karyawan</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <span className="text-sm font-semibold text-default-700 block">Siklus Pembayaran:</span>
+                    <div
+                      className={
+                        durations.length <= 1
+                          ? "flex flex-wrap gap-2"
+                          : `grid gap-2 ${
+                              durations.length === 2
+                                ? "grid-cols-2"
+                                : durations.length === 3
+                                  ? "grid-cols-3"
+                                  : "grid-cols-2 sm:grid-cols-4"
+                            }`
+                      }
+                    >
+                      {durations.length === 0 ? (
+                        <span className="text-xs text-default-400">
+                          {loading ? "Memuat siklus..." : "Siklus belum tersedia"}
+                        </span>
+                      ) : (
+                        durations.map((d) => (
+                          <button
+                            key={d.value}
+                            type="button"
+                            onClick={() => setDuration(d.value)}
+                            className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all ${
+                              durations.length === 1 ? "w-auto min-w-[5.5rem]" : "w-full"
+                            } ${
+                              duration === d.value
+                                ? "bg-primary/10 border-primary text-primary shadow-sm"
+                                : "bg-background border-default-200 text-default-600 hover:border-default-400"
+                            }`}
+                          >
+                            {d.label}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 bg-default-50/50 p-6 md:p-8 rounded-2xl border flex flex-col justify-between h-full space-y-6">
+                  <div>
+                    <span className="text-xs font-bold text-default-500 uppercase tracking-wider">
+                      Rekomendasi Paket
+                    </span>
+                    <h4 className="text-2xl font-extrabold text-default-900 mt-1">
+                      {recommended?.prd_name || (loading ? "Memuat..." : "—")}
+                    </h4>
+                    <p className="text-sm text-default-600 mt-2">
+                      {recommended?.prd_desc ||
+                        "Geser jumlah karyawan untuk melihat rekomendasi paket."}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-dashed pt-4">
+                    <span className="text-xs text-default-400 font-semibold block">
+                      Estimasi Biaya ({selectedDurationLabel}):
+                    </span>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-3xl font-extrabold text-primary">
+                        {recommendedTotal === 0
+                          ? "Gratis"
+                          : recommendedTotal != null
+                            ? formatPrice(recommendedTotal)
+                            : "Hubungi Sales"}
+                      </span>
+                      {recommendedTotal != null && recommendedTotal > 0 && (
+                        <span className="text-sm text-default-500 font-semibold">/ total</span>
+                      )}
+                    </div>
+                    {recommended &&
+                      recommendedPkg &&
+                      recommendedPaytype === "personal" &&
+                      recommendedTotal != null &&
+                      recommendedTotal > 0 && (
+                        <span className="text-xs text-default-500 font-medium block mt-1">
+                          {employeeCount} karyawan ×{" "}
+                          {formatPrice(Number(recommendedPkg.pkg_price || 0))} ×{" "}
+                          {getPackageMonths(recommendedPkg) || duration} bln
+                        </span>
+                      )}
+                    {recommended &&
+                      recommendedPaytype === "package" &&
+                      !isFreeProduct(recommended) &&
+                      recommendedTotal != null &&
+                      recommendedTotal > 0 && (
+                        <span className="text-xs text-default-500 font-medium block mt-1">
+                          Harga paket flat untuk {Number(recommended.prd_min_employee || 0)}–
+                          {Number(recommended.prd_max_employee || 0)} karyawan
+                        </span>
+                      )}
+                    {recommended &&
+                      Number(recommended.prd_price_extra_employee || 0) > 0 &&
+                      employeeCount > Number(recommended.prd_max_employee || 0) && (
+                        <span className="text-xs text-emerald-600 font-medium block mt-1">
+                          *Termasuk biaya {employeeCount - Number(recommended.prd_max_employee)} extra
+                          karyawan:{" "}
+                          {formatPrice(
+                            (employeeCount - Number(recommended.prd_max_employee)) *
+                              Number(recommended.prd_price_extra_employee) *
+                              duration
+                          )}
+                        </span>
+                      )}
+                  </div>
+
+                  <a href={recommendedRegisterUrl} className="w-full">
+                    <Button className="w-full font-bold group h-12 text-sm shadow-md">
+                      Mulai Sekarang
+                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </a>
+                </div>
+              </div>
+            </div>
           </motion.div>
         ) : (
           <motion.div
