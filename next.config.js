@@ -2,6 +2,11 @@
 const nextConfig = {
   output: "standalone",
   reactStrictMode: false,
+  // Menampilkan setiap fetch sisi-server beserta status cache-nya
+  // (cache: HIT / SKIP) di terminal. Hapus blok ini bila sudah tidak perlu.
+  logging: {
+    fetches: { fullUrl: true },
+  },
   webpack(config) {
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.(".svg")
