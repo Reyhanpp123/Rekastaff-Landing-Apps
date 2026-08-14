@@ -9,10 +9,18 @@ import PricingSection from "@/components/landing/PricingSection";
 import TestimonialSection from "@/components/landing/TestimonialSection";
 import FaqSection from "@/components/landing/FaqSection";
 import CtaSection from "@/components/landing/CtaSection";
+import { buildHomeJsonLd } from "@/lib/seo";
 
 export default function HomePage() {
+  // `<` di-escape agar string tidak bisa menutup tag <script> lebih awal.
+  const jsonLd = JSON.stringify(buildHomeJsonLd()).replace(/</g, "\\u003c");
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+      />
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
