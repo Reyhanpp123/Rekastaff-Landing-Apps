@@ -10,6 +10,8 @@ import {
 } from "@/lib/seo";
 import "./assets/scss/globals.scss";
 import "./assets/scss/theme.scss";
+// Harus terakhir: mengunci tema biru agar tidak kalah dari :root bawaan template.
+import "./assets/scss/theme-lock.scss";
 
 export const metadata: Metadata = {
   // Wajib agar path relatif (OG image, canonical) resolve ke URL absolut.
