@@ -429,7 +429,12 @@ export default function PricingSection() {
                             : "bg-default-50/50"
                         }`}
                       >
-                        <a href={getProductRegisterUrl(product)} className="w-full">
+                        <a
+                          href={getProductRegisterUrl(product)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full"
+                        >
                           <Button
                             variant={isPopular || isRecommended ? undefined : "outline"}
                             className="w-full font-bold h-11 text-sm"
@@ -603,7 +608,12 @@ export default function PricingSection() {
                       )}
                   </div>
 
-                  <a href={recommendedRegisterUrl} className="w-full">
+                  <a
+                    href={recommendedRegisterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
                     <Button className="w-full font-bold group h-12 text-sm shadow-md">
                       Mulai Sekarang
                       <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
