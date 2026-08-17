@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   ChevronRight,
   Puzzle,
+  BadgePercent,
+  PiggyBank,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +36,11 @@ import {
   BillingAddon,
   BillingProduct,
   estimateProductTotal,
+  estimateSavings,
+  formatDurationLabel,
   getAvailableDurations,
+  getBestDurationDiscount,
+  getDurationDiscount,
   getPackageForDuration,
   getPackageMonths,
   getRecommendedProduct,
@@ -113,6 +119,18 @@ export default function PricingContent({
   const recommendedTotal = useMemo(() => {
     if (!recommended) return null;
     return estimateProductTotal(recommended, employeeCount, duration);
+  }, [recommended, employeeCount, duration]);
+
+  /** Diskon terbesar di katalog — dipakai untuk banner promosi. */
+  const bestDiscount = useMemo(
+    () => getBestDurationDiscount(products),
+    [products]
+  );
+
+  /** Hemat nominal untuk kombinasi yang sedang dipilih di kalkulator. */
+  const recommendedSavings = useMemo(() => {
+    if (!recommended) return null;
+    return estimateSavings(recommended, employeeCount, duration);
   }, [recommended, employeeCount, duration]);
 
   const recommendedPkg = useMemo(
@@ -284,6 +302,31 @@ export default function PricingContent({
             Mulai gratis untuk tim kecil, atau upgrade ke paket profesional dengan kuota yang fleksibel sesuai ukuran bisnis Anda.
           </p>
         </div>
+
+        {/*
+          Banner diskon. Persentasenya dihitung dari katalog (harga periode
+          dibanding tarif bulanan × jumlah bulan), jadi ikut berubah sendiri
+          bila admin mengubah harga — dan hilang sendiri bila diskon dicabut.
+        */}
+        {bestDiscount && (
+          <div className="flex justify-center -mt-8 mb-12">
+            <div className="inline-flex items-center gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-5 py-4 shadow-sm">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                <BadgePercent className="h-6 w-6 text-emerald-600" />
+              </span>
+              <p className="text-left text-sm text-default-700 leading-relaxed">
+                <span className="font-extrabold text-emerald-600">
+                  Hemat hingga {Math.round(bestDiscount.percent)}%
+                </span>{" "}
+                dengan berlangganan {formatDurationLabel(bestDiscount.months)}.
+                <span className="hidden sm:inline">
+                  {" "}
+                  Semakin panjang siklus pembayaran, semakin besar potongannya.
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-center mb-12">
           <div className="inline-flex p-1.5 bg-default-100 rounded-full border shadow-sm">
@@ -480,8 +523,8 @@ export default function PricingContent({
                     <div
                       className={
                         durations.length <= 1
-                          ? "flex flex-wrap gap-2"
-                          : `grid gap-2 ${
+                          ? "flex flex-wrap gap-2.5"
+                          : `grid gap-2.5 ${
                               durations.length === 2
                                 ? "grid-cols-2"
                                 : durations.length === 3
@@ -495,22 +538,39 @@ export default function PricingContent({
                           Siklus belum tersedia
                         </span>
                       ) : (
-                        durations.map((d) => (
-                          <button
-                            key={d.value}
-                            type="button"
-                            onClick={() => setDuration(d.value)}
-                            className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all ${
-                              durations.length === 1 ? "w-auto min-w-[5.5rem]" : "w-full"
-                            } ${
-                              duration === d.value
-                                ? "bg-primary/10 border-primary text-primary shadow-sm"
-                                : "bg-background border-default-200 text-default-600 hover:border-default-400"
-                            }`}
-                          >
-                            {d.label}
-                          </button>
-                        ))
+                        durations.map((d) => {
+                          const discount = recommended
+                            ? getDurationDiscount(recommended, d.value)
+                            : null;
+
+                          return (
+                            <button
+                              key={d.value}
+                              type="button"
+                              onClick={() => setDuration(d.value)}
+                              className={`flex flex-col items-center justify-center gap-0.5 py-2.5 px-2 border rounded-xl text-xs font-bold transition-all ${
+                                durations.length === 1 ? "w-auto min-w-[5.5rem]" : "w-full"
+                              } ${
+                                duration === d.value
+                                  ? "bg-primary/10 border-primary text-primary shadow-sm"
+                                  : "bg-background border-default-200 text-default-600 hover:border-default-400"
+                              }`}
+                            >
+                              <span>{d.label}</span>
+                              {discount != null && (
+                                <span
+                                  className={`text-[10px] font-extrabold leading-none ${
+                                    duration === d.value
+                                      ? "text-emerald-600"
+                                      : "text-emerald-600/70"
+                                  }`}
+                                >
+                                  Hemat {Math.round(discount)}%
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   </div>
@@ -546,6 +606,19 @@ export default function PricingContent({
                         <span className="text-sm text-default-500 font-semibold">/ total</span>
                       )}
                     </div>
+                    {recommendedSavings != null && (
+                      <div className="mt-2.5 flex items-center gap-2.5 rounded-lg bg-emerald-500/10 px-3 py-2">
+                        <PiggyBank className="h-4 w-4 shrink-0 text-emerald-600" />
+                        <div className="leading-tight">
+                          <span className="block text-xs font-extrabold text-emerald-700">
+                            Hemat {formatPrice(recommendedSavings)}
+                          </span>
+                          <span className="block text-[11px] font-medium text-emerald-700/70">
+                            dibanding bayar bulanan
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     {recommended &&
                       recommendedPkg &&
                       recommendedPaytype === "personal" &&

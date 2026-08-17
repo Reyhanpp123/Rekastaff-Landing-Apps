@@ -184,3 +184,100 @@ export function estimateProductTotal(
   }
   return total;
 }
+
+export interface DurationDiscount {
+  months: number;
+  /** Persentase hemat dibanding membayar per bulan. */
+  percent: number;
+}
+
+/** Selisih di bawah ambang ini dianggap pembulatan, bukan diskon. */
+const MIN_DISCOUNT_PERCENT = 0.5;
+
+/**
+ * Diskon sebuah durasi, diturunkan dari data — bukan angka tetap.
+ *
+ * Pembandingnya adalah harga bila membayar bulanan selama periode yang sama:
+ * tarif paket 1 bulan × jumlah bulan. Karena persentasenya dihitung dari
+ * pkg_price, angka yang tampil otomatis mengikuti berapa pun harga yang diset
+ * admin — termasuk bila diskonnya diubah atau dihapus.
+ *
+ * Mengembalikan null bila paket 1 bulan tidak ada (tidak ada pembanding),
+ * atau bila harga periode ternyata tidak lebih murah.
+ */
+export function getDurationDiscount(
+  product: BillingProduct,
+  durationMonths: number
+): number | null {
+  if (durationMonths <= 1) return null;
+
+  const monthly = getPackageForDuration(product, 1);
+  const target = getPackageForDuration(product, durationMonths);
+  if (!monthly || !target) return null;
+
+  const monthlyRate = Number(monthly.pkg_price || 0);
+  const targetPrice = Number(target.pkg_price || 0);
+  if (monthlyRate <= 0 || targetPrice <= 0) return null;
+
+  const paytype = (
+    target.pkg_paytype ||
+    product.prd_paytype ||
+    "package"
+  ).toLowerCase();
+  const months = getPackageMonths(target) || durationMonths;
+
+  // personal → pkg_price adalah tarif per karyawan/bulan, jadi dibandingkan langsung.
+  // package  → pkg_price adalah total periode, jadi pembandingnya tarif bulanan × bulan.
+  const listPrice = paytype === "personal" ? monthlyRate : monthlyRate * months;
+  if (listPrice <= 0) return null;
+
+  const percent = (1 - targetPrice / listPrice) * 100;
+  return percent >= MIN_DISCOUNT_PERCENT ? percent : null;
+}
+
+/** Diskon terbesar di seluruh katalog — dipakai untuk banner promosi. */
+export function getBestDurationDiscount(
+  products: BillingProduct[]
+): DurationDiscount | null {
+  let best: DurationDiscount | null = null;
+
+  for (const product of products) {
+    for (const pkg of product.packages || []) {
+      if (pkg.pkg_status === "X" || pkg.pkg_status === "Z") continue;
+      const months = getPackageMonths(pkg);
+      const percent = getDurationDiscount(product, months);
+      if (percent == null) continue;
+      if (!best || percent > best.percent) best = { months, percent };
+    }
+  }
+
+  return best;
+}
+
+/**
+ * Nominal yang dihemat untuk kombinasi paket, jumlah karyawan, dan durasi
+ * tertentu — dibanding membayar bulanan selama periode yang sama.
+ */
+export function estimateSavings(
+  product: BillingProduct,
+  employeeCount: number,
+  durationMonths: number
+): number | null {
+  if (durationMonths <= 1) return null;
+
+  const actual = estimateProductTotal(product, employeeCount, durationMonths);
+  const monthly = estimateProductTotal(product, employeeCount, 1);
+  if (actual == null || monthly == null || monthly <= 0) return null;
+
+  const saving = monthly * durationMonths - actual;
+  return saving > 0 ? saving : null;
+}
+
+/** Label ringkas sebuah durasi, mis. 12 → "1 Tahun". */
+export function formatDurationLabel(months: number): string {
+  if (months >= 12 && months % 12 === 0) {
+    const years = months / 12;
+    return years === 1 ? "1 Tahun" : `${years} Tahun`;
+  }
+  return `${months} Bulan`;
+}
