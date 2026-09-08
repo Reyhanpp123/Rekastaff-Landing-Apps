@@ -26,7 +26,18 @@ export const HRD_REGISTER_STARTER_URL = buildRegisterUrl({
   prd_idx: STARTER_PRD_IDX,
 });
 
-export const CONTACT_EMAIL = "info@rekastaff.com";
+export const CONTACT_EMAIL = "rekastaff@gmail.com";
+
+export const CONTACT_ADDRESS =
+  "Graha Mulia Sejahtera, Jl. Terusan Jakarta No. I75 A, Antapani, Kota Bandung, Jawa Barat 40291";
+
+export const CONTACT_ADDRESS_PARTS = {
+  streetAddress: "Graha Mulia Sejahtera, Jl. Terusan Jakarta No. I75 A, Antapani",
+  addressLocality: "Kota Bandung",
+  addressRegion: "Jawa Barat",
+  postalCode: "40291",
+  addressCountry: "ID",
+} as const;
 
 export const WHATSAPP_CONTACTS = [
   {

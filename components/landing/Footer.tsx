@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MapPin, Mail, MessageCircle, ArrowRight } from "lucide-react";
 import { SiteLogo } from "@/components/svg";
 import {
+  CONTACT_ADDRESS,
   CONTACT_EMAIL,
   HRD_LOGIN_URL,
   HRD_REGISTER_STARTER_URL,
@@ -117,11 +118,11 @@ const Footer = () => {
               Hubungi Kami
             </h3>
             <ul className="space-y-4 text-sm text-default-400">
-              <li className="flex items-center gap-3">
+              <li className="flex items-start gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5">
                   <MapPin className="h-4 w-4 text-primary-300" />
                 </span>
-                Jakarta, Indonesia
+                <span className="pt-2 leading-relaxed">{CONTACT_ADDRESS}</span>
               </li>
               <li>
                 <a

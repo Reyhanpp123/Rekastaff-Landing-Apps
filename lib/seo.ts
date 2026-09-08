@@ -1,4 +1,5 @@
 import {
+  CONTACT_ADDRESS_PARTS,
   CONTACT_EMAIL,
   SITE_URL,
   WHATSAPP_CONTACTS,
@@ -66,8 +67,7 @@ export function buildHomeJsonLd() {
         telephone: WHATSAPP_CONTACTS.map((c) => c.e164),
         address: {
           "@type": "PostalAddress",
-          addressLocality: "Jakarta",
-          addressCountry: "ID",
+          ...CONTACT_ADDRESS_PARTS,
         },
         contactPoint: WHATSAPP_CONTACTS.map((c) => ({
           "@type": "ContactPoint",

@@ -7,10 +7,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   PlayCircle,
-  ShieldCheck,
   CheckCircle2,
-  Users,
-  Banknote,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,7 +133,7 @@ const HeroSection = () => {
           </motion.div>
         </motion.div>
 
-        {/* Preview dashboard + floating cards */}
+        {/* Preview dashboard */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
@@ -145,71 +142,18 @@ const HeroSection = () => {
         >
           <div className="absolute -inset-x-8 top-8 -z-10 h-full rounded-[40px] bg-gradient-to-t from-primary/20 via-primary/5 to-transparent blur-2xl" />
 
-          <div className="relative overflow-hidden rounded-2xl border border-default-200 bg-card shadow-2xl shadow-primary/10 md:rounded-3xl">
-            <div className="flex items-center gap-1.5 border-b bg-default-50 px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-              <span className="h-2.5 w-2.5 rounded-full bg-warning/60" />
-              <span className="h-2.5 w-2.5 rounded-full bg-success/60" />
-              <span className="ml-3 hidden rounded-md bg-background px-3 py-1 text-[11px] font-medium text-default-400 sm:block">
-                app.rekastaff.com
-              </span>
-            </div>
+          <motion.div
+            animate={{ y: [0, -14, 0] }}
+            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+          >
             <Image
-              src="/images/all-img/banner.png"
+              src="/images/all-img/banner_2.png"
               alt="Preview Dashboard Rekastaff HRIS"
               width={1536}
               height={1024}
               className="block h-auto w-full"
               priority
             />
-          </div>
-
-          {/* Floating card: absensi */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-            className="absolute -left-4 top-16 hidden rounded-2xl border bg-card/95 p-4 shadow-xl backdrop-blur md:block lg:-left-16"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
-                <Users className="h-5 w-5 text-success" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-default-400">
-                  Hadir Hari Ini
-                </p>
-                <p className="text-lg font-extrabold text-default-900">
-                  96 <span className="text-xs font-bold text-success">↑ 8</span>
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Floating card: payroll */}
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 1 }}
-            className="absolute -right-4 bottom-20 hidden rounded-2xl border bg-card/95 p-4 shadow-xl backdrop-blur md:block lg:-right-16"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <Banknote className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-default-400">
-                  Payroll Otomatis
-                </p>
-                <p className="text-sm font-bold text-default-900">
-                  128 slip gaji terkirim
-                </p>
-              </div>
-            </div>
-            <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-success/10 px-2.5 py-1">
-              <ShieldCheck className="h-3.5 w-3.5 text-success" />
-              <span className="text-[11px] font-bold text-success">
-                PPh 21 & BPJS terhitung
-              </span>
-            </div>
           </motion.div>
         </motion.div>
       </div>
