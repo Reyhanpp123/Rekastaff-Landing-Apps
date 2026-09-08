@@ -11,15 +11,16 @@ import {
 } from "@/lib/site";
 
 const productLinks = [
-  { label: "Fitur", href: "#features" },
-  { label: "Cara Kerja", href: "#how-it-works" },
-  { label: "Harga & Paket", href: "#pricing" },
-  { label: "Modul Add-on Pro+", href: "#pricing" },
+  { label: "Fitur", href: "/#features" },
+  { label: "Cara Kerja", href: "/#how-it-works" },
+  { label: "Harga & Paket", href: "/#pricing" },
+  { label: "Modul Add-on Pro+", href: "/#pricing" },
 ];
 
 const companyLinks = [
-  { label: "Testimoni", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Testimoni", href: "/#testimonials" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
 ];
 
 const Footer = () => {

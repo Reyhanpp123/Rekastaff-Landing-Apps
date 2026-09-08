@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import { HRD_LOGIN_URL, HRD_REGISTER_STARTER_URL } from "@/lib/site";
 
 const navLinks = [
-  { label: "Fitur", href: "#features" },
-  { label: "Cara Kerja", href: "#how-it-works" },
-  { label: "Harga", href: "#pricing" },
-  { label: "Testimoni", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Fitur", href: "/#features" },
+  { label: "Cara Kerja", href: "/#how-it-works" },
+  { label: "Harga", href: "/#pricing" },
+  { label: "Testimoni", href: "/#testimonials" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 const Navbar = () => {
