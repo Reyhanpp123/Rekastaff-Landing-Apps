@@ -3,9 +3,9 @@ export const SITE_URL =
 
 export const HRD_URL = process.env.NEXT_PUBLIC_HRD_URL;
 
-export const HRD_LOGIN_URL = `${HRD_URL}/en/auth/login`;
+export const HRD_LOGIN_URL = `${HRD_URL}/id/auth/login`;
 
-export const HRD_REGISTER_URL = `${HRD_URL}/en/auth/register`;
+export const HRD_REGISTER_URL = `${HRD_URL}/id/auth/register`;
 
 /** Default STARTER product when user picks free / no plan context */
 export const STARTER_PRD_IDX = "RS-PRD-001";
