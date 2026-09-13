@@ -371,7 +371,15 @@ export default function PricingContent({
                 <p className="text-sm text-default-600">{fetchError}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
+              <div
+                className={`grid grid-cols-1 gap-8 items-stretch mx-auto ${
+                  products.length <= 1
+                    ? "md:grid-cols-1 max-w-md"
+                    : products.length === 2
+                      ? "md:grid-cols-2 max-w-4xl"
+                      : "md:grid-cols-3 max-w-6xl"
+                }`}
+              >
                 {products.map((product) => {
                   const features = parseFeatureList(product.prd_features);
                   const isRecommended = recommended?.prd_idx === product.prd_idx;

@@ -24,6 +24,8 @@ export interface BillingProduct {
   prd_max_employee?: number;
   prd_price_extra_employee?: number;
   prd_status?: string;
+  /** T = paket gratis (RS-PRD-001 / STARTER) */
+  is_free_plan?: string;
   packages?: BillingPackage[];
 }
 
@@ -71,19 +73,29 @@ export function getPackageMonths(pkg: BillingPackage): number {
 }
 
 export function isFreeProduct(product: BillingProduct): boolean {
+  if (product.is_free_plan === "T") return true;
+  if (product.prd_idx === "RS-PRD-001" || product.prd_id === "01") return true;
+
   const name = (product.prd_name || "").toLowerCase();
   if (name.includes("starter") || name.includes("free") || name.includes("gratis")) {
     return true;
   }
+
   const packages = (product.packages || []).filter((p) => p.pkg_status !== "X");
-  if (packages.length && packages.every((p) => Number(p.pkg_price) === 0)) {
-    return true;
-  }
-  return (
-    Number(product.prd_max_employee || 0) <= 5 &&
-    Number(product.prd_price_extra_employee || 0) === 0 &&
-    (!product.packages || product.packages.length === 0)
+  return Boolean(
+    packages.length && packages.every((p) => Number(p.pkg_price) === 0)
   );
+}
+
+/** Kuota maks karyawan paket FREE — dari katalog, bukan angka tetap. */
+export function getFreeMaxEmployees(product: BillingProduct): number {
+  return Math.max(0, Number(product.prd_max_employee ?? 0));
+}
+
+export function findFreeProduct(
+  products: BillingProduct[]
+): BillingProduct | null {
+  return products.find((p) => isFreeProduct(p)) ?? null;
 }
 
 export function getRecommendedProduct(
@@ -92,18 +104,17 @@ export function getRecommendedProduct(
 ): BillingProduct | null {
   if (!products.length) return null;
 
-  const sorted = [...products].sort(
-    (a, b) => Number(a.prd_max_employee || 0) - Number(b.prd_max_employee || 0)
-  );
+  const free = findFreeProduct(products);
+  const freeMax = free ? getFreeMaxEmployees(free) : 0;
+  const paid = products
+    .filter((p) => !isFreeProduct(p))
+    .sort(
+      (a, b) => Number(a.prd_min_employee || 0) - Number(b.prd_min_employee || 0)
+    );
 
-  const fit = sorted.find((p) => {
-    const min = Number(p.prd_min_employee || 0);
-    const max = Number(p.prd_max_employee || Number.MAX_SAFE_INTEGER);
-    return employeeCount >= min && employeeCount <= max;
-  });
-
-  if (fit) return fit;
-  return sorted[sorted.length - 1];
+  // FLW-01..04: headcount <= kuota FREE → FREE; di atasnya → PRO (katalog jual tanpa CUSTOM).
+  if (free && employeeCount <= freeMax) return free;
+  return paid[0] || free || products[0];
 }
 
 export function getPackageForDuration(
@@ -141,10 +152,9 @@ export function getAvailableDurations(
 
 /**
  * Estimasi total biaya untuk durasi (bulan).
- * - package: pkg_price flat untuk periode (tidak × jumlah karyawan)
- * - personal: jumlah karyawan × pkg_price × months
- * - free → 0
- * Catatan: pkg_price_min tidak dipakai.
+ * - FREE → 0
+ * - personal (PRO kuota): max(min_kuota, employeeCount) × pkg_price × months (PKT-06)
+ * - package flat (legacy, jika masih muncul): pkg_price (+ extra bila ada)
  */
 export function estimateProductTotal(
   product: BillingProduct,
@@ -154,35 +164,23 @@ export function estimateProductTotal(
   if (isFreeProduct(product)) return 0;
 
   const pkg = getPackageForDuration(product, durationMonths);
-  const extraRate = Number(product.prd_price_extra_employee || 0);
-  const maxEmp = Number(product.prd_max_employee || 0);
-  const minEmp = Number(product.prd_min_employee || 0);
   const paytype = (pkg?.pkg_paytype || product.prd_paytype || "package").toLowerCase();
-  const count = Math.max(employeeCount, 1);
+  const minQuota = Math.max(1, Number(product.prd_min_employee || 0));
+  const billable = Math.max(employeeCount, minQuota, 1);
 
-  if (!pkg) {
-    if (paytype === "personal" && extraRate > 0) {
-      return Math.max(count, minEmp) * extraRate * durationMonths;
-    }
-    if (extraRate > 0 && count > maxEmp) {
-      return (count - maxEmp) * extraRate * durationMonths;
-    }
-    return null;
-  }
+  if (!pkg) return null;
 
   const months = getPackageMonths(pkg) || durationMonths;
+  const rate = Number(pkg.pkg_price || 0);
+  if (rate <= 0) return null;
 
   if (paytype === "personal") {
-    const rate = Number(pkg.pkg_price || extraRate || 0);
-    if (rate <= 0) return null;
-    return count * rate * months;
+    // PKT-06 / F-04
+    return billable * rate * months;
   }
 
-  let total = Number(pkg.pkg_price || 0);
-  if (count > maxEmp && extraRate > 0) {
-    total += (count - maxEmp) * extraRate * months;
-  }
-  return total;
+  // Flat package (tidak diharapkan di catalog jual baru)
+  return rate;
 }
 
 export interface DurationDiscount {
