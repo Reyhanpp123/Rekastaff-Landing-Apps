@@ -5,7 +5,6 @@ import { SiteLogo } from "@/components/svg";
 import {
   CONTACT_ADDRESS,
   CONTACT_EMAIL,
-  HRD_LOGIN_URL,
   HRD_REGISTER_STARTER_URL,
   WHATSAPP_CONTACTS,
 } from "@/lib/site";
@@ -92,14 +91,6 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
-              <li>
-                <a
-                  href={HRD_LOGIN_URL}
-                  className="transition-colors hover:text-primary-300"
-                >
-                  Login Admin
-                </a>
-              </li>
               <li>
                 <a
                   href={HRD_REGISTER_STARTER_URL}
