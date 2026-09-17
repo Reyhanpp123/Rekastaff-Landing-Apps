@@ -147,7 +147,7 @@ const HeroSection = () => {
             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
           >
             <Image
-              src="/images/all-img/banner_2.png"
+              src="/images/all-img/banner.png"
               alt="Preview Dashboard Rekastaff HRIS"
               width={1536}
               height={1024}

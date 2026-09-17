@@ -40,11 +40,12 @@ export const CONTACT_ADDRESS_PARTS = {
 } as const;
 
 export const WHATSAPP_CONTACTS = [
-  {
-    e164: "+6289618506101",
-    display: "+62 896-1850-6101",
-    href: "https://wa.me/6289618506101",
-  },
+  // Sementara di-hide — aktifkan lagi nanti
+  // {
+  //   e164: "+6289618506101",
+  //   display: "+62 896-1850-6101",
+  //   href: "https://wa.me/6289618506101",
+  // },
   {
     e164: "+6281281529300",
     display: "+62 812-8152-9300",
