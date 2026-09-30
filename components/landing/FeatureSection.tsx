@@ -16,8 +16,12 @@ import {
   MessageSquare,
   Sparkles,
   Check,
+  ArrowRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
+import ParallaxLayer from "./parallax/ParallaxLayer";
 
 const highlightFeatures = [
   {
@@ -94,7 +98,18 @@ const addonModules = [
 const FeatureSection = () => {
   return (
     <section id="features" className="relative overflow-hidden py-20 md:py-28">
-      <div className="absolute top-0 left-1/2 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-primary/5 blur-[140px]" />
+      {/* Layer background & visual parallax */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <ParallaxLayer range={60} className="absolute left-1/2 top-0 -translate-x-1/2">
+          <div className="h-[400px] w-[700px] rounded-full bg-primary/5 blur-[140px]" />
+        </ParallaxLayer>
+        <ParallaxLayer range={-100} className="absolute -left-20 top-1/2">
+          <div className="h-56 w-56 rounded-full bg-green-500/10 blur-[90px]" />
+        </ParallaxLayer>
+        <ParallaxLayer range={-60} className="absolute -right-16 top-1/3">
+          <div className="h-56 w-56 rounded-full bg-blue-500/10 blur-[90px]" />
+        </ParallaxLayer>
+      </div>
 
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-20">
@@ -115,7 +130,7 @@ const FeatureSection = () => {
         {/* Highlight: 2 kartu besar */}
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
           {highlightFeatures.map((feature, index) => (
-            <Reveal key={feature.title} delay={index * 0.1}>
+            <Reveal key={feature.title} delay={index * 0.1} direction={index === 0 ? "left" : "right"}>
               <div className="group relative h-full overflow-hidden rounded-3xl border bg-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10 md:p-10">
                 <div
                   className={`absolute -right-10 -top-10 h-40 w-40 rounded-full ${feature.bg} blur-3xl transition-opacity opacity-60 group-hover:opacity-100`}
@@ -189,6 +204,16 @@ const FeatureSection = () => {
               Bayar sekali, akses selamanya — lihat detailnya di bagian harga.
             </p>
           </div>
+        </Reveal>
+
+        {/* CTA section fitur */}
+        <Reveal delay={0.2} className="mt-10 flex justify-center">
+          <a href={HRD_REGISTER_STARTER_URL} target="_blank" rel="noopener noreferrer">
+            <Button size="xl" className="group h-14 px-8 text-base font-bold shadow-lg shadow-primary/25">
+              Coba Semua Fitur Gratis
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </a>
         </Reveal>
       </div>
     </section>

@@ -3,6 +3,7 @@ import { UserPlus, Building2, Rocket, ArrowRight, Workflow } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
+import DrawLine from "./parallax/DrawLine";
 
 const steps = [
   {
@@ -48,7 +49,7 @@ const HowItWorksSection = () => {
 
         <div className="relative mx-auto max-w-5xl">
           {/* Garis penghubung (desktop) */}
-          <div className="absolute left-0 right-0 top-10 hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent lg:block" />
+          <DrawLine className="absolute left-[16%] right-[16%] top-10 hidden h-0.5 lg:block" />
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-8">
             {steps.map((step, index) => (

@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL, WHATSAPP_CONTACTS } from "@/lib/site";
 import Reveal from "./Reveal";
+import ParallaxLayer from "./parallax/ParallaxLayer";
 
 const ctaPoints = ["Gratis untuk tim kecil", "Tanpa kartu kredit", "Bantuan setup dari tim kami"];
 
@@ -10,12 +11,16 @@ const CtaSection = () => {
   return (
     <section className="py-20 md:py-28">
       <div className="container px-4 sm:px-8">
-        <Reveal>
+        <Reveal direction="scale">
           <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-primary-700 via-primary to-primary-600 px-6 py-14 text-center shadow-2xl shadow-primary/30 md:px-16 md:py-20">
             {/* Dekorasi background */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:40px_40px]" />
-            <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-primary-950/40 blur-3xl" />
+            <ParallaxLayer range={-60} className="absolute -left-20 -top-20">
+              <div className="h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+            </ParallaxLayer>
+            <ParallaxLayer range={60} className="absolute -bottom-24 -right-16">
+              <div className="h-72 w-72 rounded-full bg-primary-950/40 blur-3xl" />
+            </ParallaxLayer>
 
             <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6">
               <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white md:text-5xl">

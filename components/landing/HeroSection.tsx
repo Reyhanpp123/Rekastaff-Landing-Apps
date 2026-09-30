@@ -9,9 +9,12 @@ import {
   PlayCircle,
   CheckCircle2,
   Sparkles,
+  MapPin,
+  Banknote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
+import ParallaxLayer from "./parallax/ParallaxLayer";
 
 const heroHighlights = [
   "Gratis untuk tim kecil",
@@ -36,11 +39,18 @@ const itemVariants = {
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-28">
-      {/* Background dekoratif */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--default-200)/0.4)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--default-200)/0.4)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,#000_60%,transparent_100%)]" />
-        <div className="absolute -top-32 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-primary/10 blur-[140px]" />
-        <div className="absolute top-1/3 -right-24 h-[350px] w-[350px] rounded-full bg-info/10 blur-[120px]" />
+      {/* LAYER 1 — Background (paling lambat): grid + glow */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <ParallaxLayer range={80} className="absolute inset-x-0 -top-20 h-[130%]">
+          <div className="h-full w-full bg-[linear-gradient(to_right,hsl(var(--default-200)/0.4)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--default-200)/0.4)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_0%,#000_60%,transparent_100%)]" />
+        </ParallaxLayer>
+        {/* LAYER 2 — Visual sedang: blob warna */}
+        <ParallaxLayer range={-50} className="absolute -top-32 left-1/2 -translate-x-1/2">
+          <div className="h-[500px] w-[800px] rounded-full bg-primary/10 blur-[140px]" />
+        </ParallaxLayer>
+        <ParallaxLayer range={-90} className="absolute top-1/3 -right-24">
+          <div className="h-[350px] w-[350px] rounded-full bg-info/10 blur-[120px]" />
+        </ParallaxLayer>
       </div>
 
       <div className="container px-4 sm:px-8">
@@ -141,6 +151,30 @@ const HeroSection = () => {
           className="relative mx-auto mt-14 max-w-5xl md:mt-20"
         >
           <div className="absolute -inset-x-8 top-8 -z-10 h-full rounded-[40px] bg-gradient-to-t from-primary/20 via-primary/5 to-transparent blur-2xl" />
+
+          {/* Chip melayang (layer visual, bergerak berlawanan scroll) — disembunyikan di mobile agar tidak menutupi konten */}
+          <ParallaxLayer range={-70} className="absolute -left-4 top-[18%] z-10 hidden md:block lg:-left-10">
+            <div className="flex items-center gap-3 rounded-2xl border bg-background/90 px-4 py-3 shadow-xl backdrop-blur">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                <MapPin className="h-5 w-5 text-blue-500" />
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-bold text-default-900">Absensi GPS</p>
+                <p className="text-xs text-default-500">Lokasi & selfie tervalidasi</p>
+              </div>
+            </div>
+          </ParallaxLayer>
+          <ParallaxLayer range={-120} className="absolute -right-4 bottom-[16%] z-10 hidden md:block lg:-right-10">
+            <div className="flex items-center gap-3 rounded-2xl border bg-background/90 px-4 py-3 shadow-xl backdrop-blur">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                <Banknote className="h-5 w-5 text-green-500" />
+              </span>
+              <div className="text-left">
+                <p className="text-sm font-bold text-default-900">Payroll Otomatis</p>
+                <p className="text-xs text-default-500">PPh 21 & BPJS sekali klik</p>
+              </div>
+            </div>
+          </ParallaxLayer>
 
           <motion.div
             animate={{ y: [0, -14, 0] }}

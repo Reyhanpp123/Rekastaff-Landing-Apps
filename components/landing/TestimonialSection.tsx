@@ -1,6 +1,10 @@
 import React from "react";
 import { Star, Quote, MessageSquare } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
+import ParallaxLayer from "./parallax/ParallaxLayer";
 
 // TODO: Ganti dengan testimoni asli dari pelanggan Rekastaff.
 const testimonials = [
@@ -36,7 +40,18 @@ const testimonials = [
 const TestimonialSection = () => {
   return (
     <section id="testimonials" className="relative overflow-hidden py-20 md:py-28">
-      <div className="absolute bottom-0 left-1/2 -z-10 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-[120px]" />
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <ParallaxLayer range={50} className="absolute bottom-0 left-1/2 -translate-x-1/2">
+          <div className="h-[300px] w-[600px] rounded-full bg-primary/5 blur-[120px]" />
+        </ParallaxLayer>
+        {/* Tanda kutip raksasa sebagai dekorasi, parallax ringan */}
+        <ParallaxLayer range={-70} className="absolute left-[4%] top-10 hidden lg:block">
+          <Quote className="h-40 w-40 text-primary/[0.06]" />
+        </ParallaxLayer>
+        <ParallaxLayer range={-40} className="absolute bottom-10 right-[4%] hidden lg:block">
+          <Quote className="h-32 w-32 rotate-180 text-primary/[0.06]" />
+        </ParallaxLayer>
+      </div>
 
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
@@ -56,7 +71,7 @@ const TestimonialSection = () => {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
           {testimonials.map((testimonial, index) => (
-            <Reveal key={testimonial.name} delay={index * 0.1}>
+            <Reveal key={testimonial.name} delay={index * 0.1} direction="scale" className={index === 1 ? "md:mt-10" : ""}>
               <figure className="relative flex h-full flex-col rounded-3xl border bg-card p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
                 <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/10" />
                 <div className="mb-4 flex gap-1">
@@ -86,6 +101,15 @@ const TestimonialSection = () => {
             </Reveal>
           ))}
         </div>
+
+        <Reveal delay={0.2} className="mt-14 flex justify-center">
+          <a href={HRD_REGISTER_STARTER_URL} target="_blank" rel="noopener noreferrer">
+            <Button size="xl" className="group h-14 px-8 text-base font-bold shadow-lg shadow-primary/25">
+              Gabung Sekarang, Gratis
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </a>
+        </Reveal>
       </div>
     </section>
   );

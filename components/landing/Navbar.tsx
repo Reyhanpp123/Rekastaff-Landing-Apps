@@ -6,6 +6,7 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import { SiteLogo } from "@/components/svg";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import ScrollProgress from "./parallax/ScrollProgress";
 import { HRD_LOGIN_URL, HRD_REGISTER_STARTER_URL } from "@/lib/site";
 
 const navLinks = [
@@ -83,6 +84,8 @@ const Navbar = () => {
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
+
+      <ScrollProgress />
 
       <div
         className={cn(
