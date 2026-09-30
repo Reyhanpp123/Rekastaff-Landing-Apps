@@ -1,5 +1,5 @@
 import React from "react";
-import { UserPlus, Building2, Rocket, ArrowRight } from "lucide-react";
+import { UserPlus, Building2, Rocket, ArrowRight, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
@@ -35,7 +35,7 @@ const HowItWorksSection = () => {
     <section id="how-it-works" className="border-y bg-default-50/60 py-20 md:py-28">
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-20">
-          <SectionLabel number="03" className="mb-4 justify-center">Cara Kerja</SectionLabel>
+          <SectionLabel icon={Workflow} className="mb-4">Cara Kerja</SectionLabel>
           <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-default-900 md:text-5xl">
             Mulai dalam <span className="text-primary">3 Langkah Mudah</span>
           </h2>

@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Check,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
@@ -113,7 +114,7 @@ const FeatureSection = () => {
 
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-20">
-          <SectionLabel number="01" className="mb-4 justify-center">Fitur Unggulan</SectionLabel>
+          <SectionLabel icon={Sparkles} className="mb-4">Fitur Unggulan</SectionLabel>
           <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-default-900 md:text-5xl">
             Semua Kebutuhan HR,{" "}
             <span className="text-primary">Satu Platform</span>

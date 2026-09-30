@@ -2,32 +2,22 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface SectionLabelProps {
-  number: string;
+  icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
-  /** Varian untuk latar gelap. */
-  dark?: boolean;
   className?: string;
 }
 
-/** Penanda section bernomor (gaya rekapos.com): [01] FITUR UNGGULAN. */
-const SectionLabel = ({ number, children, dark, className }: SectionLabelProps) => (
-  <p
+/** Badge pill penanda section (ikon + label), dipakai konsisten di semua section. */
+const SectionLabel = ({ icon: Icon, children, className }: SectionLabelProps) => (
+  <span
     className={cn(
-      "flex items-center gap-3 text-xs font-bold uppercase tracking-[0.18em]",
-      dark ? "text-sky-300" : "text-primary",
+      "inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary sm:text-sm",
       className
     )}
   >
-    <span
-      className={cn(
-        "rounded-md px-1.5 py-0.5 text-[11px] tabular-nums",
-        dark ? "bg-white/10 text-white" : "bg-primary/10 text-primary"
-      )}
-    >
-      {number}
-    </span>
+    <Icon className="h-3.5 w-3.5" />
     {children}
-  </p>
+  </span>
 );
 
 export default SectionLabel;
