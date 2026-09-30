@@ -2,6 +2,8 @@ import React from "react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import HeroSection from "@/components/landing/HeroSection";
+import FlowSection from "@/components/landing/FlowSection";
+import SmoothScroll from "@/components/landing/parallax/SmoothScroll";
 import TrustSection from "@/components/landing/TrustSection";
 import FeatureSection from "@/components/landing/FeatureSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
@@ -21,11 +23,13 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
+      <SmoothScroll />
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
         <TrustSection />
         <FeatureSection />
+        <FlowSection />
         <HowItWorksSection />
         <PricingSection />
         <TestimonialSection />

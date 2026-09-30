@@ -1,9 +1,10 @@
 import React from "react";
-import { Star, Quote, MessageSquare } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
+import SectionLabel from "./parallax/SectionLabel";
 import ParallaxLayer from "./parallax/ParallaxLayer";
 
 // TODO: Ganti dengan testimoni asli dari pelanggan Rekastaff.
@@ -55,10 +56,7 @@ const TestimonialSection = () => {
 
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary sm:text-sm">
-            <MessageSquare className="h-3.5 w-3.5" />
-            Testimoni
-          </span>
+          <SectionLabel number="04" className="mb-4 justify-center">Testimoni</SectionLabel>
           <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-default-900 md:text-5xl">
             Dipercaya Tim HR di{" "}
             <span className="text-primary">Berbagai Industri</span>

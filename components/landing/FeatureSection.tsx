@@ -14,13 +14,13 @@ import {
   Plane,
   Wallet,
   MessageSquare,
-  Sparkles,
   Check,
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import Reveal from "./Reveal";
+import SectionLabel from "./parallax/SectionLabel";
 import ParallaxLayer from "./parallax/ParallaxLayer";
 
 const highlightFeatures = [
@@ -113,10 +113,7 @@ const FeatureSection = () => {
 
       <div className="container px-4 sm:px-8">
         <Reveal className="mx-auto mb-14 max-w-3xl text-center md:mb-20">
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            Fitur Unggulan
-          </span>
+          <SectionLabel number="01" className="mb-4 justify-center">Fitur Unggulan</SectionLabel>
           <h2 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-default-900 md:text-5xl">
             Semua Kebutuhan HR,{" "}
             <span className="text-primary">Satu Platform</span>
