@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import { SITE_URL } from "@/lib/site";
+import SupportWidget from "@/components/support-widget/SupportWidget";
 import {
   SEO_DESCRIPTION,
   SEO_KEYWORDS,
@@ -74,6 +75,7 @@ export default function RootLayout({
     <html lang="id" className="theme-blue">
       <body>
         {children}
+        <SupportWidget />
         <Toaster position="top-right" />
       </body>
     </html>
