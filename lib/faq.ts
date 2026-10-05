@@ -20,6 +20,36 @@ export const faqs: FaqItem[] = [
       "Ya. Tersedia paket Starter gratis untuk mulai mengelola absensi, cuti, dan data karyawan tanpa biaya di awal. Anda bisa upgrade kapan saja saat tim bertambah.",
   },
   {
+    id: "beda-starter-pro",
+    question: "Apa beda paket Starter dan Pro?",
+    answer:
+      "Starter gratis untuk maksimal 5 karyawan dan 1 cabang, dengan absensi GPS, cuti, database karyawan, kalender kerja, pengumuman, dan dashboard kehadiran. Pro mencakup semua fitur Starter, ditambah manajemen shift, lembur dan koreksi kehadiran, slip gaji dengan komponen gaji fleksibel, kas karyawan, laporan, multi cabang, divisi dan posisi, kontrol akses berbasis peran, serta import massal data pegawai dan shift.",
+  },
+  {
+    id: "harga-pro",
+    question: "Berapa biaya paket Pro?",
+    answer:
+      "Rp5.000 per karyawan per bulan dengan minimum kuota 30 karyawan, jadi tagihan minimal Rp150.000 per bulan. Kuota bisa ditambah tanpa batas sesuai kebutuhan.",
+  },
+  {
+    id: "batas-starter",
+    question: "Apa yang terjadi jika karyawan melebihi batas paket Starter?",
+    answer:
+      "Paket Starter tidak bisa menambah karyawan di atas 5 orang. Untuk menambah karyawan, upgrade ke paket Pro.",
+  },
+  {
+    id: "pro-berakhir",
+    question: "Bagaimana jika paket Pro saya berakhir?",
+    answer:
+      "Data perusahaan dan karyawan tetap tersimpan, tetapi penggunaan fitur dibatasi sampai Anda memperpanjang paket.",
+  },
+  {
+    id: "addon-rekrutmen-dinas",
+    question: "Apa itu add-on Rekrutmen dan Perjalanan Dinas?",
+    answer:
+      "Add-on adalah fitur tambahan seharga Rp100.000 sekali bayar dan berlaku selamanya, per perusahaan. Rekrutmen mencakup halaman karier publik, lowongan, form pelamar, seleksi, tes online, jadwal interview, dan onboarding. Perjalanan Dinas mencakup permohonan dengan persetujuan berjenjang, pencatatan pengeluaran dan reimburse, laporan, serta riwayat dinas per karyawan. Add-on hanya bisa dibeli setelah berlangganan paket Pro.",
+  },
+  {
     id: "setup-awal",
     question: "Berapa lama proses setup awal?",
     answer:
