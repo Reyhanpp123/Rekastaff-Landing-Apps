@@ -2,25 +2,6 @@ import { faqs, type FaqItem } from "@/lib/faq";
 import { CONTACT_EMAIL, WHATSAPP_CONTACTS } from "@/lib/site";
 
 /**
- * Khusus widget — sengaja tidak ditaruh di lib/faq.ts supaya tidak ikut
- * JSON-LD FAQPage (isi schema harus sama dengan FAQ yang tampil di halaman).
- */
-const WIDGET_ONLY_FAQS: FaqItem[] = [
-  {
-    id: "import-excel",
-    question: "Bisakah data karyawan diimpor dari Excel?",
-    answer:
-      "Bisa. Setelah mendaftar, unduh template Excel di menu Import Pegawai, isi data karyawan, lalu unggah kembali. Cara yang sama tersedia untuk jadwal shift.",
-  },
-  {
-    id: "multi-cabang",
-    question: "Apakah bisa untuk perusahaan dengan beberapa cabang?",
-    answer:
-      "Bisa. Cabang dikelola dalam satu akun perusahaan, dan komponen gaji (tunjangan maupun potongan) dapat diatur per cabang.",
-  },
-];
-
-/**
  * Urutan FAQ di widget. Dari lib/faq.ts hanya item yang klaimnya sudah
  * diverifikasi; item lain ditahan sampai teksnya disetujui pemilik produk
  * (REKASTAFF-Docs/features/support-widget/REKASTAFF_SUPPORT_WIDGET_FAQ_CURATION.md §3).
@@ -33,10 +14,8 @@ const WIDGET_FAQ_ORDER = [
   "install-aplikasi",
 ];
 
-const faqCandidates = [...faqs, ...WIDGET_ONLY_FAQS];
-
 export const supportFaqs: FaqItem[] = WIDGET_FAQ_ORDER.map((id) =>
-  faqCandidates.find((faq) => faq.id === id),
+  faqs.find((faq) => faq.id === id),
 ).filter((faq): faq is FaqItem => Boolean(faq));
 
 const supportWhatsApp = WHATSAPP_CONTACTS[0];
