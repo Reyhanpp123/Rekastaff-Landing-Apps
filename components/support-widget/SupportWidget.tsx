@@ -207,7 +207,7 @@ const SupportWidget = () => {
                 onClick={() => closePanel({ restoreFocus: false })}
                 className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-md text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
-                Lihat semua FAQ
+                Lihat FAQ lengkap
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
 

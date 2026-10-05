@@ -38,6 +38,18 @@ export const faqs: FaqItem[] = [
       "Ya, modul penggajian mendukung perhitungan gaji, BPJS, dan PPh 21 sesuai konfigurasi perusahaan. Untuk kebutuhan lanjutan, tersedia juga modul add-on pada paket Pro+.",
   },
   {
+    id: "import-excel",
+    question: "Bisakah data karyawan diimpor dari Excel?",
+    answer:
+      "Bisa. Setelah mendaftar, unduh template Excel di menu Import Pegawai, isi data karyawan, lalu unggah kembali. Cara yang sama tersedia untuk jadwal shift.",
+  },
+  {
+    id: "multi-cabang",
+    question: "Apakah bisa untuk perusahaan dengan beberapa cabang?",
+    answer:
+      "Bisa. Cabang dikelola dalam satu akun perusahaan, dan komponen gaji (tunjangan maupun potongan) dapat diatur per cabang.",
+  },
+  {
     id: "karyawan-bertambah",
     question: "Bagaimana jika jumlah karyawan bertambah?",
     answer:
