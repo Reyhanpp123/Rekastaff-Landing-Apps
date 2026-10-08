@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  // Opsional: build verifikasi ke folder lain tanpa mengganggu `.next` milik
+  // dev server yang sedang jalan. Default tetap `.next` (Docker/Vercel).
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   reactStrictMode: false,
   // Menampilkan setiap fetch sisi-server beserta status cache-nya
   // (cache: HIT / SKIP) di terminal. Hapus blok ini bila sudah tidak perlu.

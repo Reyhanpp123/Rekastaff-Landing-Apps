@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import { Toaster } from "react-hot-toast";
 import { SITE_URL } from "@/lib/site";
 import SupportWidget from "@/components/support-widget/SupportWidget";
@@ -13,6 +14,19 @@ import "./assets/scss/globals.scss";
 import "./assets/scss/theme.scss";
 // Harus terakhir: mengunci tema biru agar tidak kalah dari :root bawaan template.
 import "./assets/scss/theme-lock.scss";
+import "./assets/scss/landing.scss";
+
+// Self-host (bukan next/font/google) agar build Docker tetap jalan tanpa
+// akses internet. Variable font 200-800, subset latin, ~27 KB.
+const jakarta = localFont({
+  src: "./fonts/PlusJakartaSans-latin-wght.woff2",
+  weight: "200 800",
+  style: "normal",
+  display: "swap",
+  variable: "--font-jakarta",
+  adjustFontFallback: "Arial",
+  preload: true,
+});
 
 export const metadata: Metadata = {
   // Wajib agar path relatif (OG image, canonical) resolve ke URL absolut.
@@ -61,7 +75,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#137EE9",
+  themeColor: "#2563EB",
   width: "device-width",
   initialScale: 1,
 };
@@ -72,7 +86,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="theme-blue">
+    <html lang="id" className={`theme-blue ${jakarta.variable}`}>
       <body>
         {children}
         <SupportWidget />

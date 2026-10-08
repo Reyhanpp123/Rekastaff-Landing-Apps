@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node --test tests/",
+    "capture:dashboard": "node scripts/capture-dashboard.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -39,6 +41,7 @@
     "@types/react-dom": "^18.3.0",
     "eslint": "8.48.0",
     "eslint-config-next": "14.0.1",
+    "puppeteer-core": "^23.11.1",
     "typescript": "^5.4.5"
   }
 }

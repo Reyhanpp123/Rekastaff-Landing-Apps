@@ -1,0 +1,64 @@
+{
+  "capturedAt": "2026-10-08T13:02:00.082Z",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "deviceScaleFactor": 2
+  },
+  "shots": [
+    {
+      "id": "attendance",
+      "file": "attendance.png",
+      "width": 2880,
+      "height": 1800,
+      "sourceUrl": "http://localhost:3001/id/attendance/presence",
+      "note": "Kehadiran",
+      "capturedAt": "2026-10-08T13:02:00.082Z",
+      "privacy": {
+        "tourDismissed": true,
+        "masked": {
+          "nik": 0,
+          "email": 1,
+          "name": 0,
+          "avatar": 2
+        }
+      }
+    },
+    {
+      "id": "leave",
+      "file": "leave.png",
+      "width": 2880,
+      "height": 1800,
+      "sourceUrl": "http://localhost:3001/id/manage/leave",
+      "note": "Persetujuan cuti",
+      "capturedAt": "2026-10-08T13:02:00.082Z",
+      "privacy": {
+        "tourDismissed": true,
+        "masked": {
+          "nik": 10,
+          "email": 1,
+          "name": 10,
+          "avatar": 2
+        }
+      }
+    },
+    {
+      "id": "payroll",
+      "file": "payroll.png",
+      "width": 2880,
+      "height": 1800,
+      "sourceUrl": "http://localhost:3001/id/payroll/processing",
+      "note": "Proses payroll",
+      "capturedAt": "2026-10-08T13:02:00.082Z",
+      "privacy": {
+        "tourDismissed": true,
+        "masked": {
+          "nik": 0,
+          "email": 1,
+          "name": 0,
+          "avatar": 2
+        }
+      }
+    }
+  ]
+}

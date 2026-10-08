@@ -2,8 +2,8 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, MapPin, ShieldCheck } from "lucide-react";
-import Navbar from "@/components/landing/Navbar";
-import Footer from "@/components/landing/Footer";
+import Navbar from "@/components/landing/Navbar/Navbar";
+import Footer from "@/components/landing/Footer/Footer";
 import { CONTACT_ADDRESS, CONTACT_EMAIL, SITE_URL } from "@/lib/site";
 import { SITE_NAME } from "@/lib/seo";
 import {
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="rs-landing min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
-      <main className="flex-grow">
+      <main id="konten" tabIndex={-1} className="flex-grow outline-none">
         <section className="border-b bg-default-50/60 py-16 md:py-20">
           <div className="container px-4 sm:px-8">
             <div className="mx-auto max-w-3xl text-center">

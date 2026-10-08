@@ -51,4 +51,9 @@ export const WHATSAPP_CONTACTS = [
     display: "+62 812-8152-9300",
     href: "https://wa.me/6281281529300",
   },
+  {
+    e164: "+6282320282891",
+    display: "+62 823-2028-2891",
+    href: "https://wa.me/6282320282891",
+  },
 ] as const;

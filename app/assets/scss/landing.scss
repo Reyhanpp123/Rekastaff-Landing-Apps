@@ -1,0 +1,370 @@
+/**
+ * Design system landing page Rekastaff.
+ * Sumber: LANDING_PAGE_REDESIGN_PLAN.md bagian 15 (warna, radius, shadow) dan 19 (motion).
+ *
+ * Token memakai namespace `--rs-*` (format "R G B" agar bisa dipakai dengan
+ * alpha di Tailwind: `bg-rs-primary/10`). Token template dashboard (`--primary`,
+ * `--default-*`) tidak disentuh.
+ */
+:root {
+  --rs-primary: 37 99 235; /* #2563EB */
+  --rs-primary-strong: 29 78 216; /* #1D4ED8 - teks aksen kecil (AA) */
+  --rs-cyan: 6 182 212; /* #06B6D4 */
+  --rs-amber: 245 158 11; /* #F59E0B - jam & highlight dekoratif */
+  --rs-amber-strong: 180 83 9; /* #B45309 - amber untuk teks kecil (AA) */
+  --rs-success: 22 163 74; /* #16A34A */
+  --rs-danger: 220 38 38; /* #DC2626 */
+  --rs-bg: 255 255 255;
+  --rs-surface: 246 248 252; /* #F6F8FC */
+  --rs-raised: 255 255 255;
+  --rs-text: 11 18 32; /* #0B1220 */
+  --rs-muted: 75 90 114; /* #4B5A72 - 6.9:1 di putih */
+  --rs-border: 227 232 242; /* #E3E8F2 */
+  --rs-ink: 15 23 42; /* #0F172A */
+  --rs-night: 11 18 32; /* #0B1220 */
+  --rs-night-2: 19 35 74; /* #13234A */
+  --rs-night-raised: 22 33 58; /* #16213A */
+  --rs-night-text: 232 238 249; /* #E8EEF9 */
+  --rs-night-muted: 154 168 194; /* #9AA8C2 - 7.8:1 di night */
+  --rs-night-border: 34 48 77; /* #22304D */
+
+  --rs-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rs-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --rs-header-h: 64px;
+}
+
+.rs-landing {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgb(var(--rs-text));
+  background: rgb(var(--rs-bg));
+  // `clip` (bukan hidden) supaya position: sticky di dalamnya tetap bekerja.
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  [id] {
+    scroll-margin-top: calc(var(--rs-header-h) + 8px);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Focus ring yang selalu terlihat - juga di section gelap.
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid rgb(var(--rs-primary));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  [data-tone="dark"] a:focus-visible,
+  [data-tone="dark"] button:focus-visible,
+  [data-tone="dark"] [tabindex]:focus-visible {
+    outline-color: #93c5fd;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography scale (bagian 15.2)                                      */
+/* ------------------------------------------------------------------ */
+.rs-display {
+  font-size: clamp(72px, 14vw, 220px);
+  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rs-h1 {
+  font-size: clamp(36px, 5.6vw, 76px);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.rs-h2 {
+  font-size: clamp(30px, 4vw, 56px);
+  line-height: 1.1;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.rs-h3 {
+  font-size: clamp(20px, 1.8vw, 24px);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rs-lead {
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.55;
+  font-weight: 450;
+}
+
+.rs-eyebrow {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  @media (min-width: 768px) {
+    font-size: 13px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Entrance hero (CSS murni: berjalan tanpa menunggu hidrasi JS)       */
+/* ------------------------------------------------------------------ */
+@keyframes rs-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rs-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rs-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes rs-slide-phone {
+  from {
+    opacity: 0;
+    transform: translate3d(48px, 32px, 0) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-3deg);
+  }
+}
+
+// Digit jam bergulir 08.01 -> 08.02 (satu kali).
+@keyframes rs-digit-roll {
+  0%,
+  35% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes rs-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.rs-enter {
+  animation: rs-rise 600ms var(--rs-ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.rs-enter-fade {
+  animation: rs-fade 700ms var(--rs-ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.rs-enter-pop {
+  animation: rs-pop 420ms var(--rs-ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.rs-enter-phone {
+  animation: rs-slide-phone 760ms var(--rs-ease-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.rs-digit-roll {
+  animation: rs-digit-roll 500ms var(--rs-ease-in-out) 900ms both;
+}
+
+.rs-ping {
+  // Maksimal 3 putaran (< 5 detik) - WCAG 2.2.2.
+  animation: rs-ping 1.6s var(--rs-ease-out) 1.2s 3 both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Scroll reveal (progressive enhancement)                             */
+/* State awal = terlihat. MotionProvider hanya menambah .rs-pending     */
+/* pada elemen yang masih di bawah viewport, lalu melepasnya via IO.   */
+/* ------------------------------------------------------------------ */
+[data-reveal] {
+  transition:
+    opacity 600ms var(--rs-ease-out),
+    transform 600ms var(--rs-ease-out);
+  transition-delay: var(--rd, 0ms);
+}
+
+[data-reveal].rs-pending {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+
+[data-reveal="scale"].rs-pending {
+  transform: scale(0.96);
+}
+
+// Diagram yang "tergambar" sekali (Security).
+[data-draw] path,
+[data-draw] line,
+[data-draw] circle {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 900ms var(--rs-ease-in-out);
+  transition-delay: var(--rd, 0ms);
+}
+
+[data-draw].rs-pending path,
+[data-draw].rs-pending line,
+[data-draw].rs-pending circle {
+  stroke-dashoffset: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion: mengikuti pengaturan sistem (prefers-reduced-motion) */
+/* ------------------------------------------------------------------ */
+@mixin rs-still {
+  .rs-landing *,
+  .rs-landing *::before,
+  .rs-landing *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .rs-ping {
+    display: none;
+  }
+
+  [data-reveal].rs-pending,
+  [data-draw].rs-pending path {
+    opacity: 1;
+    transform: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  @include rs-still;
+}
+
+/* FAQ <details>: jawaban muncul halus saat dibuka (250ms). */
+.rs-faq[open] .rs-faq-body {
+  animation: rs-rise 250ms var(--rs-ease-out) both;
+  --d: 0ms;
+}
+
+/* Pilihan radio kustom: ring fokus pada label saat radio difokus keyboard. */
+.rs-choice:has(input:focus-visible) {
+  outline: 3px solid rgb(var(--rs-primary));
+  outline-offset: 2px;
+}
+
+/* Slider kalkulator (input range native, aksesibel bawaan). */
+.rs-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+
+  &::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      rgb(var(--rs-primary)) var(--fill, 0%),
+      rgb(var(--rs-border)) var(--fill, 0%)
+    );
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 26px;
+    height: 26px;
+    margin-top: -10px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid rgb(var(--rs-primary));
+    box-shadow: 0 4px 12px -2px rgb(37 99 235 / 0.35);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: rgb(var(--rs-border));
+  }
+
+  &::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: rgb(var(--rs-primary));
+  }
+
+  &::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid rgb(var(--rs-primary));
+    box-shadow: 0 4px 12px -2px rgb(37 99 235 / 0.35);
+  }
+}
+
+.rs-skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgb(var(--rs-ink));
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+
+  &:focus {
+    top: 12px;
+  }
+}

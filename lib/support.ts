@@ -18,13 +18,21 @@ export const supportFaqs: FaqItem[] = WIDGET_FAQ_ORDER.map((id) =>
   faqs.find((faq) => faq.id === id),
 ).filter((faq): faq is FaqItem => Boolean(faq));
 
-const supportWhatsApp = WHATSAPP_CONTACTS[0];
-
-export const SUPPORT_WHATSAPP_DISPLAY = supportWhatsApp.display;
-
-export const SUPPORT_WHATSAPP_URL = `${supportWhatsApp.href}?text=${encodeURIComponent(
+const SUPPORT_WHATSAPP_TEXT = encodeURIComponent(
   "Halo Rekastaff, saya ingin bertanya tentang Rekastaff.",
-)}`;
+);
+
+/** Semua nomor WhatsApp, masing-masing dengan pesan pembuka. */
+export const SUPPORT_WHATSAPP_LINKS = WHATSAPP_CONTACTS.map((contact) => ({
+  e164: contact.e164,
+  display: contact.display,
+  url: `${contact.href}?text=${SUPPORT_WHATSAPP_TEXT}`,
+}));
+
+// Nomor utama (pertama): dipakai tombol tunggal seperti menu mobile dan CTA.
+export const SUPPORT_WHATSAPP_DISPLAY = SUPPORT_WHATSAPP_LINKS[0].display;
+
+export const SUPPORT_WHATSAPP_URL = SUPPORT_WHATSAPP_LINKS[0].url;
 
 export const SUPPORT_EMAIL = CONTACT_EMAIL;
 

@@ -7,8 +7,7 @@ import { HRD_REGISTER_STARTER_URL } from "@/lib/site";
 import {
   SUPPORT_EMAIL,
   SUPPORT_EMAIL_URL,
-  SUPPORT_WHATSAPP_DISPLAY,
-  SUPPORT_WHATSAPP_URL,
+  SUPPORT_WHATSAPP_LINKS,
   supportFaqs,
   trackSupportEvent,
 } from "@/lib/support";
@@ -219,22 +218,29 @@ const SupportWidget = () => {
                   Hubungi tim kami lewat WhatsApp atau email.
                 </p>
                 <div className="flex flex-col gap-2">
-                  <a
-                    href={SUPPORT_WHATSAPP_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => trackSupportEvent("support_whatsapp_clicked")}
-                    className="inline-flex min-h-[44px] items-center gap-2.5 rounded-xl border bg-background px-4 py-2.5 text-sm font-semibold text-default-700 transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                  >
-                    <MessageCircle
-                      className="h-4 w-4 shrink-0 text-success"
-                      aria-hidden="true"
-                    />
-                    <span>
-                      WhatsApp {SUPPORT_WHATSAPP_DISPLAY}
-                      <span className="sr-only"> (membuka WhatsApp)</span>
-                    </span>
-                  </a>
+                  {SUPPORT_WHATSAPP_LINKS.map((contact) => (
+                    <a
+                      key={contact.e164}
+                      href={contact.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() =>
+                        trackSupportEvent("support_whatsapp_clicked", {
+                          number: contact.e164,
+                        })
+                      }
+                      className="inline-flex min-h-[44px] items-center gap-2.5 rounded-xl border bg-background px-4 py-2.5 text-sm font-semibold text-default-700 transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    >
+                      <MessageCircle
+                        className="h-4 w-4 shrink-0 text-success"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        WhatsApp {contact.display}
+                        <span className="sr-only"> (membuka WhatsApp)</span>
+                      </span>
+                    </a>
+                  ))}
                   <a
                     href={SUPPORT_EMAIL_URL}
                     onClick={() => trackSupportEvent("support_email_clicked")}
