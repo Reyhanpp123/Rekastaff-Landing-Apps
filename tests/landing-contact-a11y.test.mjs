@@ -24,7 +24,7 @@ const loadHtml = async () => {
   assert.equal(res.status, 200, `landing tidak bisa diambil dari ${URL}`);
   html = await res.text();
   // Pengaman: HTML kosong / halaman error tidak boleh membuat tes "tidak ada X" lulus semu.
-  assert.ok(html.includes("Kelola HR Perusahaan"), "HTML landing tidak berisi konten yang diharapkan");
+  assert.ok(html.includes("tanpa rekap manual"), "HTML landing tidak berisi konten yang diharapkan");
 };
 
 describe("kontak WhatsApp", () => {

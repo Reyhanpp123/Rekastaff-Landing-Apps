@@ -23,22 +23,22 @@ const DASH = "\u2014";
 const DOT = "\u00b7";
 
 export const hero = {
-  eyebrow: "Platform HRIS All-in-One untuk Bisnis Indonesia",
+  eyebrow: "HRIS untuk bisnis Indonesia",
   title: {
-    text: "Kelola HR Perusahaan Lebih Cerdas dalam Satu Platform",
-    highlight: "Lebih Cerdas",
+    text: "Urus absensi, cuti, dan gaji tanpa rekap manual",
+    highlight: "tanpa rekap manual",
   } satisfies Headline,
-  sub: `Absensi GPS, pengajuan cuti, payroll dengan PPh 21 & BPJS, hingga manajemen shift ${DASH} semua otomatis, akurat, dan bisa diakses dari web maupun mobile. Fokus kembangkan bisnis, biar Rekastaff yang urus HR.`,
-  primaryCta: "Coba Gratis Sekarang",
-  secondaryCta: "Lihat Fitur",
+  sub: "Karyawan absen dari HP, lengkap dengan lokasi GPS dan selfie. Cuti dan jadwal shift tercatat rapi, gaji dihitung lengkap dengan PPh 21 dan BPJS. HRD tinggal memantau dari web.",
+  primaryCta: "Coba gratis",
+  secondaryCta: "Lihat fiturnya",
   bullets: ["Gratis untuk tim kecil", "Tanpa kartu kredit", "Setup dalam hitungan jam"],
   chips: [
-    { title: "Absensi GPS", detail: "Lokasi & selfie tervalidasi" },
-    { title: "Payroll Otomatis", detail: "PPh 21 & BPJS sekali klik" },
+    { title: "Absen pakai GPS", detail: "Lokasi dan selfie dicek saat clock-in" },
+    { title: "Gaji dihitung sendiri", detail: "PPh 21 dan BPJS ikut masuk" },
   ],
   scrollHint: "Lihat alur kerja",
   srSummary:
-    "Ilustrasi: dashboard HRD menampilkan rekap kehadiran hari ini, dan HP karyawan menampilkan clock-in yang tervalidasi GPS dan selfie.",
+    "Ilustrasi: dashboard HRD menampilkan daftar kehadiran, dan HP karyawan menampilkan clock-in dengan pengecekan lokasi GPS dan selfie.",
 };
 
 /** Value strip lama, tampil sebagai Proof Strip. */

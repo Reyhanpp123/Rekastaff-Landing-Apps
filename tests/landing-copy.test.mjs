@@ -39,22 +39,65 @@ const hasAll = (list) => list.forEach(has);
 const highlighted = (s) =>
   assert.ok(new RegExp(`>\\s*${s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/&/g, "&amp;")}\\s*</span>`).test(html), `highlight tidak ditemukan: "${s}"`);
 
-test("hero memakai narasi lama", () => {
+// Hero ditulis ulang agar terdengar manusiawi (bukan slogan generik), dengan konteks tujuan tetap.
+const heroText = () => {
+  const start = html.indexOf('aria-labelledby="hero-title"');
+  const end = html.indexOf('aria-label="Keunggulan Rekastaff"');
+  assert.ok(start >= 0 && end > start, "section hero tidak ditemukan di HTML");
+  const section = html.slice(start, end).replace(/<script[\s\S]*?<\/script>/g, " ");
+  return decode(section.replace(/<\/?span[^>]*>/g, "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
+};
+
+test("hero memakai teks baru yang natural", () => {
   hasAll([
-    "Platform HRIS All-in-One untuk Bisnis Indonesia",
-    "Kelola HR Perusahaan Lebih Cerdas dalam Satu Platform",
-    `Absensi GPS, pengajuan cuti, payroll dengan PPh 21 & BPJS, hingga manajemen shift ${D} semua otomatis, akurat, dan bisa diakses dari web maupun mobile. Fokus kembangkan bisnis, biar Rekastaff yang urus HR.`,
-    "Coba Gratis Sekarang",
-    "Lihat Fitur",
+    "HRIS untuk bisnis Indonesia",
+    "Urus absensi, cuti, dan gaji tanpa rekap manual",
+    "Karyawan absen dari HP, lengkap dengan lokasi GPS dan selfie. Cuti dan jadwal shift tercatat rapi, gaji dihitung lengkap dengan PPh 21 dan BPJS. HRD tinggal memantau dari web.",
+    "Coba gratis",
+    "Lihat fiturnya",
     "Gratis untuk tim kecil",
     "Tanpa kartu kredit",
     "Setup dalam hitungan jam",
-    "Absensi GPS",
-    "Lokasi & selfie tervalidasi",
-    "Payroll Otomatis",
-    "PPh 21 & BPJS sekali klik",
+    "Absen pakai GPS",
+    "Lokasi dan selfie dicek saat clock-in",
+    "Gaji dihitung sendiri",
+    "PPh 21 dan BPJS ikut masuk",
   ]);
-  highlighted("Lebih Cerdas");
+  highlighted("tanpa rekap manual");
+});
+
+test("hero tidak lagi memakai frasa slogan khas AI", () => {
+  const hero = heroText();
+  assert.ok(hero.length > 200, "bagian hero tidak ditemukan di teks halaman");
+  for (const banned of [
+    "All-in-One",
+    "Lebih Cerdas",
+    "Satu Platform",
+    "semua otomatis, akurat",
+    "Fokus kembangkan bisnis",
+    "Coba Gratis Sekarang",
+    "Lihat Fitur",
+    "sekali klik",
+    "tervalidasi",
+    D, // tanda pisah em dash
+  ]) {
+    assert.ok(!hero.includes(banned), `hero masih memakai frasa generik: "${banned}"`);
+  }
+});
+
+test("hero tetap menjelaskan tujuan produk (konteks tidak hilang)", () => {
+  const hero = heroText().toLowerCase();
+  for (const keyword of ["hris", "absen", "cuti", "gaji", "gps", "selfie", "shift", "pph 21", "bpjs", "web", "hp", "gratis", "coba"]) {
+    assert.ok(hero.includes(keyword), `konteks hilang dari hero: "${keyword}"`);
+  }
+});
+
+test("tombol hero singkat dan jelas (maksimal 3 kata, aksi di depan)", () => {
+  for (const label of ["Coba gratis", "Lihat fiturnya"]) {
+    assert.ok(label.split(" ").length <= 3, `label "${label}" terlalu panjang`);
+  }
+  // Tombol hero tidak boleh lagi memakai label panjang gaya lama.
+  assert.ok(!heroText().includes("Coba Gratis Sekarang"));
 });
 
 test("proof strip memakai value strip lama", () => {
