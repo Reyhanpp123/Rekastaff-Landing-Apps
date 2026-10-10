@@ -25,8 +25,8 @@ const DOT = "\u00b7";
 export const hero = {
   eyebrow: "HRIS untuk bisnis Indonesia",
   title: {
-    text: "Urus absensi, cuti, dan gaji tanpa rekap manual",
-    highlight: "tanpa rekap manual",
+    text: "Kelola HR Perusahaan Lebih Cerdas dalam Satu Platform",
+    highlight: "Lebih Cerdas",
   } satisfies Headline,
   sub: "Karyawan absen dari HP, lengkap dengan lokasi GPS dan selfie. Cuti dan jadwal shift tercatat rapi, gaji dihitung lengkap dengan PPh 21 dan BPJS. HRD tinggal memantau dari web.",
   primaryCta: "Coba gratis",

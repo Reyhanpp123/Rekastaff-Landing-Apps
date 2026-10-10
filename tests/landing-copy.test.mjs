@@ -51,7 +51,8 @@ const heroText = () => {
 test("hero memakai teks baru yang natural", () => {
   hasAll([
     "HRIS untuk bisnis Indonesia",
-    "Urus absensi, cuti, dan gaji tanpa rekap manual",
+    // Judul hero memakai narasi sebelumnya (permintaan pemilik produk); sisanya ditulis ulang.
+    "Kelola HR Perusahaan Lebih Cerdas dalam Satu Platform",
     "Karyawan absen dari HP, lengkap dengan lokasi GPS dan selfie. Cuti dan jadwal shift tercatat rapi, gaji dihitung lengkap dengan PPh 21 dan BPJS. HRD tinggal memantau dari web.",
     "Coba gratis",
     "Lihat fiturnya",
@@ -63,7 +64,7 @@ test("hero memakai teks baru yang natural", () => {
     "Gaji dihitung sendiri",
     "PPh 21 dan BPJS ikut masuk",
   ]);
-  highlighted("tanpa rekap manual");
+  highlighted("Lebih Cerdas");
 });
 
 test("hero tidak lagi memakai frasa slogan khas AI", () => {
@@ -71,8 +72,6 @@ test("hero tidak lagi memakai frasa slogan khas AI", () => {
   assert.ok(hero.length > 200, "bagian hero tidak ditemukan di teks halaman");
   for (const banned of [
     "All-in-One",
-    "Lebih Cerdas",
-    "Satu Platform",
     "semua otomatis, akurat",
     "Fokus kembangkan bisnis",
     "Coba Gratis Sekarang",
